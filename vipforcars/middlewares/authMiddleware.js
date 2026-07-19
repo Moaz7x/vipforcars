@@ -20,12 +20,12 @@ const protect = async (req, res, next) => {
   }
 };
 
-// For EJS Views (Redirects to the NEW admin login page)
+// For EJS Views (Redirects to the admin login page)
 const requireAuth = async (req, res, next) => {
   const token = req.cookies.token;
 
   if (!token) {
-    return res.redirect('/admin/login'); // Fixed!
+    return res.redirect('/admin/login');
   }
 
   try {
@@ -33,13 +33,15 @@ const requireAuth = async (req, res, next) => {
     const { data: admin, error } = await supabase.from('admins').select('id, username').eq('id', decoded.id).single();
 
     if (error || !admin) {
-      return res.redirect('/admin/login'); // Fixed!
+      res.clearCookie('token'); // <--- FIX: Delete the bad cookie!
+      return res.redirect('/admin/login');
     }
 
     req.admin = admin;
     next();
   } catch (error) {
-    return res.redirect('/admin/login'); // Fixed!
+    res.clearCookie('token'); // <--- FIX: Delete the bad cookie!
+    return res.redirect('/admin/login');
   }
 };
 
