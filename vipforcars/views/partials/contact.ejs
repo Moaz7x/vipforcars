@@ -22,9 +22,42 @@
           <%= __('STEP_TRIP_DETAILS') %>
         </h3>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <% const inputs = [
-            { id: 'province', type: 'select', label: __('FORM_PROVINCE'), options: ['Cairo', 'Giza', 'Alexandria', 'Other'] },
+            { 
+              id: 'province', 
+              type: 'select', 
+              label: __('FORM_PROVINCE'), 
+              options: [
+                'Cairo / القاهرة',
+                'Giza / الجيزة',
+                'Alexandria / الإسكندرية',
+                'Aswan / أسوان',
+                'Asyut / أسيوط',
+                'Beheira / البحيرة',
+                'Beni Suef / بني سويف',
+                'Dakahlia / الدقهلية',
+                'Damietta / دمياط',
+                'Faiyum / الفيوم',
+                'Gharbia / الغربية',
+                'Ismailia / الإسماعيلية',
+                'Kafr El Sheikh / كفر الشيخ',
+                'Luxor / الأقصر',
+                'Matrouh / مطروح',
+                'Minya / المنيا',
+                'Monufia / المنوفية',
+                'New Valley / الوادي الجديد',
+                'North Sinai / شمال سيناء',
+                'Port Said / بورسعيد',
+                'Qalyubia / القليوبية',
+                'Qena / قنا',
+                'Red Sea / البحر الأحمر',
+                'Sharqia / الشرقية',
+                'Sohag / سوهاج',
+                'South Sinai / جنوب سيناء',
+                'Suez / السويس'
+              ] 
+            },
             { id: 'departure', type: 'text', label: __('FORM_DEPARTURE') },
             { id: 'destination', type: 'text', label: __('FORM_DESTINATION') },
             { id: 'date', type: 'date', label: __('FORM_DATE') },
