@@ -1,0 +1,105 @@
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VIP For Cars - Luxury Transport</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+  rel="stylesheet"
+/>
+
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          gold: { 400: "#e8c56a", 500: "#d4af37", 600: "#a88b2c" },
+          dark: { 900: "#0a0a0a", 800: "#121212", 700: "#1a1a1a" },
+          light: { 50: "#fcfaf5", 100: "#f4f0e6" },
+        },
+        fontFamily: {
+          sans: ["Montserrat", "sans-serif"],
+          serif: ["Playfair Display", "serif"],
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Luxury Custom Cursor */
+  body,
+  a,
+  button,
+  select,
+  input,
+  textarea {
+    cursor:
+      url('data:image/svg+xml;utf8,<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M10 6 L10 24 L14.5 19.5 L22 19.5 Z" fill="%23d4af37" stroke="%23d4af37" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>')
+        8 4,
+      auto !important;
+  }
+
+  /* Animations */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition:
+      opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Gradients & Buttons */
+  .gold-gradient {
+    background: linear-gradient(135deg, #a88b2c 0%, #d4af37 50%, #e8c56a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .btn-gold {
+    background: linear-gradient(135deg, #a88b2c 0%, #d4af37 50%, #e8c56a 100%);
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .btn-gold:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+  }
+
+  /* Dynamic Glassmorphism (Adapts to Light/Dark) */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+  }
+  .dark .glass-card {
+    background: rgba(26, 26, 26, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Noise Texture */
+  .noise-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter )' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+  .dark .noise-bg::before {
+    opacity: 0.06;
+  }
+</style>

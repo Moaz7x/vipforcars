@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html
+  lang="<%= lang %>"
+  dir="<%= lang === 'ar' ? 'rtl' : 'ltr' %>"
+  class="dark"
+>
+  <head>
+    <%- include('partials/head') %>
+    <script>
+      if (localStorage.getItem("theme") === "light") {
+        document.documentElement.classList.remove("dark");
+      }
+    </script>
+  </head>
+  <body
+    class="bg-light-50 dark:bg-dark-900 text-gray-900 dark:text-white font-sans antialiased transition-colors duration-500 selection:bg-gold-500 selection:text-white overflow-x-hidden w-full"
+  >
+    <%- include('partials/navbar') %> <%- include('partials/hero') %> <%-
+    include('partials/fleet') %> <%- include('partials/services') %>
+
+    <!-- ADDED ARTICLES SECTION HERE -->
+    <%- include('partials/articles') %> <%- include('partials/contact') %> <%-
+    include('partials/footer') %> <%- include('partials/floating-buttons') %>
+    <%- include('partials/scripts') %>
+
+    <script src="/js/booking.js"></script>
+  </body>
+</html>

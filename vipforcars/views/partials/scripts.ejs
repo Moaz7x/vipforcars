@@ -1,0 +1,64 @@
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Intersection Observer for fade-in animations
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            // Optional: stop observing once it's visible so it doesn't animate again
+            // observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" },
+    );
+
+    document.querySelectorAll(".fade-in").forEach((el) => {
+      observer.observe(el);
+    });
+
+    // Navbar scroll effect (adds shadow and deeper blur on scroll)
+    const navbar = document.getElementById("navbar");
+    const navbarInner = navbar.querySelector(".glass-card");
+
+    window.addEventListener("scroll", () => {
+      const currentScroll = window.pageYOffset;
+      if (currentScroll > 50) {
+        navbarInner.classList.add(
+          "shadow-lg",
+          "bg-white/90",
+          "dark:bg-dark-900/90",
+        );
+        navbarInner.classList.remove("bg-transparent", "dark:bg-transparent");
+      } else {
+        navbarInner.classList.remove(
+          "shadow-lg",
+          "bg-white/90",
+          "dark:bg-dark-900/90",
+        );
+        navbarInner.classList.add("bg-transparent", "dark:bg-transparent");
+      }
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+      anchor.addEventListener("click", function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute("href");
+        if (targetId === "#") return;
+
+        const target = document.querySelector(targetId);
+        if (target) {
+          // Close mobile menu if it's open
+          const mobileMenu = document.getElementById("mobileMenu");
+          if (mobileMenu && !mobileMenu.classList.contains("hidden")) {
+            mobileMenu.classList.add("hidden");
+          }
+
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    });
+  });
+</script>

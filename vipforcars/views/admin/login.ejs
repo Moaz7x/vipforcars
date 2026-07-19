@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VIP Admin Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              gold: { 400: "#e8c56a", 500: "#d4af37", 600: "#a88b2c" },
+              dark: { 900: "#0a0a0a", 800: "#121212", 700: "#1a1a1a" },
+            },
+            fontFamily: {
+              sans: ["Montserrat", "sans-serif"],
+              serif: ["Playfair Display", "serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .glass-panel {
+        background: rgba(26, 26, 26, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .gold-gradient-text {
+        background: linear-gradient(
+          135deg,
+          #a88b2c 0%,
+          #d4af37 50%,
+          #e8c56a 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .noise-bg::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter )' opacity='0.06'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 0;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-dark-900 text-white font-sans antialiased h-screen flex items-center justify-center relative noise-bg overflow-hidden selection:bg-gold-500 selection:text-white"
+  >
+    <!-- Decorative Background Glows -->
+    <div
+      class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none"
+    >
+      <div
+        class="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] rounded-full bg-gold-500/10 blur-[120px]"
+      ></div>
+      <div
+        class="absolute -bottom-[20%] -right-[10%] w-[60vw] h-[60vw] rounded-full bg-gold-500/5 blur-[100px]"
+      ></div>
+    </div>
+
+    <div class="relative z-10 w-full max-w-md px-6">
+      <!-- Logo -->
+      <div class="flex flex-col items-center justify-center mb-10">
+        <div
+          class="w-16 h-16 rounded-full bg-gradient-to-br from-gold-600 to-gold-400 flex items-center justify-center text-black font-bold text-3xl shadow-lg shadow-gold-500/30 mb-4"
+        >
+          V
+        </div>
+        <h2 class="text-3xl font-serif font-bold tracking-[0.2em]">
+          VIP<span class="gold-gradient-text">ADMIN</span>
+        </h2>
+        <p class="text-gray-400 text-sm mt-2 tracking-widest uppercase">
+          Secure Portal
+        </p>
+      </div>
+
+      <!-- Login Card -->
+      <div class="glass-panel p-8 md:p-10 rounded-3xl shadow-2xl">
+        <div
+          id="error-msg"
+          class="hidden bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-xl mb-6 text-center text-sm font-medium backdrop-blur-md"
+        ></div>
+
+        <form id="loginForm" class="space-y-6">
+          <div class="space-y-2">
+            <label
+              class="block text-xs font-semibold text-gray-400 uppercase tracking-wider"
+              >Username</label
+            >
+            <input
+              type="text"
+              name="username"
+              required
+              class="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none shadow-inner placeholder-gray-600"
+              placeholder="Enter your username"
+            />
+          </div>
+          <div class="space-y-2">
+            <label
+              class="block text-xs font-semibold text-gray-400 uppercase tracking-wider"
+              >Password</label
+            >
+            <input
+              type="password"
+              name="password"
+              required
+              class="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none shadow-inner placeholder-gray-600"
+              placeholder="••••••••"
+            />
+          </div>
+          <button
+            type="submit"
+            id="loginBtn"
+            class="w-full bg-gradient-to-r from-gold-600 via-gold-500 to-gold-400 text-black font-bold py-4 rounded-xl hover:shadow-lg hover:shadow-gold-500/40 hover:-translate-y-0.5 transition-all duration-300 uppercase tracking-widest text-sm mt-4"
+          >
+            Authenticate
+          </button>
+        </form>
+
+        <div class="mt-8 text-center">
+          <a
+            href="/"
+            class="text-xs text-gray-500 hover:text-gold-400 transition-colors flex items-center justify-center gap-2"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              ></path>
+            </svg>
+            Return to Public Site
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const btn = document.getElementById("loginBtn");
+          const errorMsg = document.getElementById("error-msg");
+          const formData = new FormData(e.target);
+          const data = Object.fromEntries(formData.entries());
+
+          // Loading state
+          btn.innerHTML =
+            '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-black inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Verifying...';
+          btn.classList.add("opacity-75", "cursor-not-allowed");
+
+          try {
+            const response = await fetch("/api/auth/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              window.location.href = "/admin/dashboard";
+            } else {
+              errorMsg.textContent = result.message || "Invalid credentials";
+              errorMsg.classList.remove("hidden");
+              btn.innerHTML = "Authenticate";
+              btn.classList.remove("opacity-75", "cursor-not-allowed");
+            }
+          } catch (error) {
+            errorMsg.textContent = "Server error. Please try again.";
+            errorMsg.classList.remove("hidden");
+            btn.innerHTML = "Authenticate";
+            btn.classList.remove("opacity-75", "cursor-not-allowed");
+          }
+        });
+    </script>
+  </body>
+</html>

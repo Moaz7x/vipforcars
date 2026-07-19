@@ -1,0 +1,141 @@
+<section id="articles" class="py-24 lg:py-32 px-6 relative noise-bg overflow-hidden">
+    <!-- Decorative Glow -->
+    <div class="absolute top-40 left-0 w-96 h-96 rounded-full bg-gold-500/5 blur-[120px] pointer-events-none"></div>
+    
+    <div class="max-w-7xl mx-auto relative z-10">
+        <!-- Header -->
+        <div class="text-center mb-16 fade-in">
+            <span class="text-sm tracking-[0.3em] text-gray-500 dark:text-gray-400 uppercase"><%= __('ARTICLES_SUBTITLE') %></span>
+            <h2 class="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-6 text-gray-900 dark:text-white mt-4"><%= __('ARTICLES_TITLE') %></h2>
+            <div class="w-20 h-1 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-400 mx-auto"></div>
+        </div>
+
+        <!-- Articles Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <% if (!articles || articles.length === 0) { %>
+                <p class="text-center text-gray-500 dark:text-gray-400 col-span-full py-20 font-medium"><%= __('ARTICLES_EMPTY') %></p>
+            <% } else { %>
+                <% articles.forEach((article, index) => { %>
+<div class="group fade-in cursor-pointer" 
+     style="transition-delay: 100ms" 
+     data-title="<%= article.title %>"
+     data-image="<%= article.image_url %>"
+     data-content="<%= article.content %>"
+     data-date="<%= new Date(article.created_at).toLocaleDateString() %>"
+     data-author="<%= article.author %>"
+     onclick="openArticleModal(this)">
+                    <div class="glass-card rounded-3xl overflow-hidden transition-all duration-500 hover:border-gold-500/50 hover:-translate-y-2 hover:shadow-2xl hover:shadow-gold-500/10 h-full flex flex-col">
+                        
+                        <!-- Image -->
+                        <div class="relative h-56 overflow-hidden bg-gray-200 dark:bg-dark-800">
+                            <img src="<%= article.image_url %>" alt="Article Image" class="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 flex items-center gap-2 text-xs font-bold text-white tracking-wider">
+                                <span class="bg-gold-500/80 backdrop-blur-md px-3 py-1 rounded-full"><%= new Date(article.created_at).toLocaleDateString() %></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="p-8 flex flex-col flex-grow">
+                            <h3 class="text-xl font-serif font-bold mb-3 text-gray-900 dark:text-white group-hover:text-gold-600 dark:group-hover:text-gold-400 transition-colors duration-300 line-clamp-2"><%= article.title %></h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed font-medium line-clamp-3 mb-6 flex-grow"><%= article.content %></p>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-white/10">
+                                <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+                                    <span class="w-6 h-6 rounded-full bg-gold-500/20 flex items-center justify-center text-gold-600 dark:text-gold-400">✍️</span>
+                                    <%= __('AUTHOR_BY') %> <%= article.author %>
+                                </div>
+                                <span class="text-gold-600 dark:text-gold-400 text-xs font-bold tracking-widest uppercase group-hover:translate-x-1 transition-transform"><%= __('READ_MORE') %> &rarr;</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<!-- ARTICLE READING MODAL -->
+<div id="articleModal" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 backdrop-blur-md transition-opacity duration-300 opacity-0 p-4 md:p-6">
+    <div id="articleModalContent" class="glass-card rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col transform transition-all duration-300 scale-95 opacity-0 border border-white/10 overflow-hidden bg-white/95 dark:bg-dark-900/95">
+        
+        <!-- Modal Header with Image -->
+        <div class="relative h-48 md:h-64 shrink-0">
+            <img id="modalImage" src="" alt="Article Cover" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+            <button onclick="closeArticleModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center hover:bg-gold-500 transition-colors border border-white/20">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="absolute bottom-4 left-6 right-6">
+                <div class="flex items-center gap-3 text-xs font-bold text-gold-400 tracking-wider mb-2 uppercase">
+                    <span id="modalDate"></span> • <span id="modalAuthor"></span>
+                </div>
+                <h2 id="modalTitle" class="text-2xl md:text-3xl font-serif font-bold text-white drop-shadow-lg"></h2>
+            </div>
+        </div>
+
+        <!-- Modal Body (Scrollable) -->
+        <div class="p-6 md:p-8 overflow-y-auto custom-scrollbar">
+            <p id="modalContent" class="text-gray-700 dark:text-gray-300 leading-loose font-medium text-sm md:text-base"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openArticleModal(element) {
+        // 1. Read the data safely from the clicked element
+        const title = element.getAttribute('data-title');
+        const image = element.getAttribute('data-image');
+        let content = element.getAttribute('data-content');
+        const date = element.getAttribute('data-date');
+        const author = element.getAttribute('data-author');
+
+        // 2. Convert newlines to   
+        content = content.replace(/\n/g, `
+        <br>
+      
+        `);
+
+        // 3. Inject into the modal
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalImage').src = image;
+        document.getElementById('modalContent').innerHTML = content; 
+        document.getElementById('modalDate').innerText = date;
+        document.getElementById('modalAuthor').innerText = author;
+
+        // 4. Show the modal
+        const modal = document.getElementById('articleModal');
+        const modalContent = document.getElementById('articleModalContent');
+        
+        modal.classList.remove('hidden');
+        void modal.offsetWidth; // Trigger reflow
+        
+        modal.classList.remove('opacity-0');
+        modalContent.classList.remove('scale-95', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+        
+        // Prevent background scrolling
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeArticleModal() {
+        const modal = document.getElementById('articleModal');
+        const modalContent = document.getElementById('articleModalContent');
+
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        modal.classList.add('opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            // Restore background scrolling
+            document.body.style.overflow = '';
+        }, 300);
+    }
+
+    // Close modal when clicking outside the card
+    document.getElementById('articleModal').addEventListener('click', function(e) {
+        if (e.target === this) closeArticleModal();
+    });
+</script>

@@ -1,0 +1,2412 @@
+this is how locales look like vipforcars\locales\en.json:
+
+{
+  "NAV_HOME": "HOME",
+  "NAV_FLEET": "FLEET",
+  "NAV_SERVICES": "SERVICES",
+  "NAV_CONTACT": "CONTACT",
+  "NAV_BOOK": "BOOK NOW",
+  "HERO_TITLE": "Experience True",
+  "HERO_LUXURY": "Luxury",
+  "HERO_DESC": "Premium chauffeur and VIP transport services tailored for your comfort, safety, and impeccable style.",
+  "HERO_BTN": "Explore Our Fleet",
+  "HERO_SUBTITLE": "Premium Chauffeur Service",
+  "HERO_SERVICES_BTN": "Our Services",
+  "STAT_YEARS": "Years of Experience",
+  "STAT_CLIENTS": "Happy Clients",
+  "STAT_VEHICLES": "Luxury Vehicles",
+  "SCROLL": "Scroll",
+  "FLEET_TITLE": "OUR PREMIUM FLEET",
+  "FLEET_SUBTITLE": "Our Collection",
+  "FLEET_EMPTY": "No vehicles available at the moment.",
+  "FLEET_SEATS": "Seats",
+  "FLEET_BAGS": "Bags",
+  "FLEET_RESERVE": "RESERVE NOW",
+  "SERVICES_TITLE": "OUR SERVICES",
+  "SERVICES_SUBTITLE": "What We Offer",
+  "SRV1_TITLE": "Airport Transfers",
+  "SRV1_DESC": "Punctual and stress-free transfers to and from all major airports. Your chauffeur will be waiting for you.",
+  "SRV2_TITLE": "Corporate Travel",
+  "SRV2_DESC": "Impress your clients and travel between meetings in absolute comfort and privacy with our executive fleet.",
+  "SRV3_TITLE": "Weddings & Events",
+  "SRV3_DESC": "Make your special day unforgettable with our luxury limousines and premium chauffeur service.",
+  "CONTACT_TITLE": "BOOK YOUR RIDE",
+  "CONTACT_SUBTITLE": "Book Your Ride",
+  "CONTACT_SUB": "Fill out the form below and our VIP concierge team will contact you shortly.",
+  "STEP_TRIP_DETAILS": "Trip Details",
+  "STEP_YOUR_DETAILS": "Your Details",
+  "FORM_NAME": "Full Name",
+  "FORM_PHONE": "Phone Number",
+  "FORM_EMAIL": "Email Address",
+  "FORM_SERVICE": "Service Type",
+  "FORM_OPT1": "Airport Transfer",
+  "FORM_OPT2": "Corporate Travel",
+  "FORM_OPT3": "Hourly Chauffeur",
+  "FORM_OPT4": "Wedding / Event",
+  "FORM_DETAILS": "Additional Details (Date, Time, Vehicle Preference)",
+  "FORM_SUBMIT": "SUBMIT REQUEST",
+  "FOOTER_DESC": "Providing world-class luxury transportation and chauffeur services for those who demand the very best.",
+  "FOOTER_LINKS": "QUICK LINKS",
+  "FOOTER_CONTACT": "CONTACT US",
+  "FOOTER_ADMIN": "Admin Login",
+  "FOOTER_ADMIN_PHONE": "Admin Phone",
+  "FOOTER_RIGHTS": "VIP For Cars. All rights reserved.",
+  "FORM_TRIP_NUM": "Trip Number",
+  "FORM_PROVINCE": "Select Governorate",
+  "FORM_DEPARTURE": "Departure Address",
+  "FORM_DESTINATION": "Destination Address",
+  "FORM_DIRECTION": "Direction Type",
+  "FORM_DIR_ONEWAY": "One Way",
+  "FORM_DIR_ROUND": "Round Trip",
+  "FORM_DATE": "Departure Date",
+  "FORM_TIME": "Departure Time",
+  "FORM_AIRPORT": "Is this trip to/from the airport?",
+  "FORM_YES": "Yes",
+  "FORM_NO": "No",
+  "FORM_PASSENGERS": "Number of Passengers",
+  "FORM_BAGS": "Are there bags?",
+  "FORM_CAR_TYPE": "Select Car Type",
+  "CAR_SEDAN": "Sedan (4 Passengers)",
+  "CAR_SUV_MODERN": "Modern SUV",
+  "CAR_FAMILY_VIP": "VIP Family Car",
+  "CAR_SUV_FAMILY": "Family SUV (7 Passengers)",
+  "CAR_H1": "H1 Car (9 Passengers)",
+  "CAR_MICROBUS": "Microbus (15 Passengers)",
+  "FORM_NOTES": "Notes (Optional)",
+  "FORM_NOTES_PH": "e.g., wheelchair, special equipment, baby seat...",
+  "FORM_TERMS": "I agree to the terms and conditions",
+  "FORM_SUBMIT_COST": "Know the cost and book the trip now",
+  "BTN_WHATSAPP": "WhatsApp",
+  "BTN_CALL_US": "Call Us",
+    "FORM_TRIP_TYPE": "Trip Type",
+  "FORM_TRIP_INSIDE": "Inside Province",
+  "FORM_TRIP_OUTSIDE": "Between Provinces",
+  "FORM_BACKUP_PHONE": "Backup Phone Number"
+
+}
+
+```markdown
+. 📂 vipforcars
+└── 📂 config/
+│  ├── 📄 supabase.js:
+const { createClient } = require('@supabase/supabase-js');
+const dotenv = require('dotenv');
+const WebSocket = require('ws'); // Import the ws package
+
+dotenv.config();
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+    console.error('Missing Supabase URL or Key in .env file');
+    process.exit(1);
+}
+
+// Initialize Supabase with the WebSocket transport
+const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+        persistSession: false // Recommended for backend server environments
+    },
+    realtime: {
+        transport: WebSocket // Fixes the Node.js 20 WebSocket error
+    }
+});
+
+module.exports = supabase;
+
+
+└── 📂 controllers/
+│  ├── 📄 adminController.js
+const supabase = require('../config/supabase');
+
+// Render Login Page
+const renderLogin = (req, res) => {
+  // If they have a token AND it's not the fake 'none' string, send to dashboard
+  if (req.cookies.token && req.cookies.token !== 'none') {
+    return res.redirect('/admin/dashboard');
+  }
+  res.render('admin/login');
+};
+
+// Render Dashboard
+const getDashboard = async (req, res) => {
+  try {
+    // Fetch Vehicles
+    const { data: vehicles, error: vError } = await supabase
+      .from('vehicles')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (vError) throw vError;
+
+    // Fetch Bookings
+    const { data: bookings, error: bError } = await supabase
+      .from('bookings')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (bError) throw bError;
+
+    res.render('admin/dashboard', { vehicles, bookings, admin: req.admin });
+  } catch (error) {
+    res.status(500).send('Error loading dashboard: ' + error.message);
+  }
+};
+
+// Add New Vehicle (From HTML Form)
+const addVehicle = async (req, res) => {
+  try {
+    const { name, category, passengers, luggage, desc_en, desc_ar } = req.body;
+    let image_url = '/images/default-car.jpg'; // Fallback image
+
+    // If a file was uploaded, send it to Supabase Storage
+    if (req.file) {
+      // Create a unique file name (e.g., 1684321-bmw.jpg)
+      const fileExt = req.file.originalname.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+      // Upload to Supabase
+      const { data, error: uploadError } = await supabase.storage
+        .from('vehicles')
+        .upload(fileName, req.file.buffer, {
+          contentType: req.file.mimetype
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get the public URL for the uploaded image
+      const { data: publicUrlData } = supabase.storage
+        .from('vehicles')
+        .getPublicUrl(fileName);
+
+      image_url = publicUrlData.publicUrl;
+    }
+
+    // Save vehicle to database with the image URL
+    const { error } = await supabase
+      .from('vehicles')
+      .insert([{ name, category, passengers, luggage, desc_en, desc_ar, image_url }]);
+
+    if (error) throw error;
+    res.redirect('/admin/dashboard');
+  } catch (error) {
+    res.status(400).send('Error adding vehicle: ' + error.message);
+  }
+};
+
+// Delete Vehicle (From HTML Form)
+const deleteVehicle = async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from('vehicles')
+      .delete()
+      .eq('id', req.params.id);
+
+    if (error) throw error;
+    res.redirect('/admin/dashboard'); // Refresh page on success
+  } catch (error) {
+    res.status(400).send('Error deleting vehicle: ' + error.message);
+  }
+};
+const deleteBooking = async (req, res) => {
+  try {
+    await supabase.from('bookings').delete().eq('id', req.params.id);
+    res.redirect('/admin/dashboard');
+  } catch (error) {
+    res.status(400).send('Error deleting booking');
+  }
+};
+module.exports = { renderLogin, getDashboard, addVehicle, deleteVehicle, deleteBooking }; // Export it!
+
+
+│  ├── 📄 authController.js
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const supabase = require('../config/supabase');
+
+// @desc    Render login page
+// @route   GET /api/auth/login
+const renderLogin = (req, res) => {
+    res.render('login');
+};
+
+// @desc    Login admin & get token
+// @route   POST /api/auth/login
+const login = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // Validate input
+        if (!username || !password) {
+            return res.status(400).json({ success: false, message: 'Please provide username and password' });
+        }
+
+        // 1. Fetch admin from Supabase
+        const { data: admin, error } = await supabase
+            .from('admins')
+            .select('*')
+            .eq('username', username)
+            .single(); // .single() ensures we get one object, not an array
+
+        if (error || !admin) {
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+
+        // 2. Verify password using bcrypt
+        const isMatch = await bcrypt.compare(password, admin.password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+
+        // 3. Create JWT Payload
+        const payload = { id: admin.id, username: admin.username };
+
+        // 4. Sign Token
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { 
+            expiresIn: '1d' 
+        });
+
+        // 5. Set JWT in an HTTP-only cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 24 * 60 * 60 * 1000 // 1 day
+        } );
+
+        res.status(200).json({ success: true, message: 'Logged in successfully', token });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Logout admin / clear cookie
+// @route   GET /api/auth/logout
+const logout = (req, res) => {
+    res.clearCookie('token'); // Properly deletes the cookie
+    res.redirect('/admin/login'); // Redirects to the login page
+};
+
+
+module.exports = { renderLogin, login, logout };
+
+│  ├── 📄 publicController.js
+const supabase = require('../config/supabase');
+
+const getHomePage = async (req, res) => {
+    try {
+        // Debug: log current language
+        console.log(`[DEBUG] Rendering homepage in language: ${req.getLocale()}`);
+        console.log(`[DEBUG] res.locals.lang value: ${res.locals.lang}`);
+        console.log(`[DEBUG] Translation test - HERO_TITLE: ${req.__('HERO_TITLE')}`);
+        
+        // Fetch vehicles to display on the homepage
+        const { data: vehicles, error } = await supabase
+            .from('vehicles')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        
+        // Render the index page and pass the vehicles data to it
+        res.render('index', { vehicles });
+    } catch (error) {
+        console.error('[ERROR] Loading homepage:', error.message);
+        res.status(500).send('Error loading homepage: ' + error.message);
+    }
+};
+
+module.exports = { getHomePage };
+
+│  ├── 📄 vehicleController.js
+const supabase = require('../config/supabase');
+
+// @desc    Get all vehicles
+// @route   GET /api/vehicles
+// @access  Public
+const getVehicles = async (req, res) => {
+    try {
+        const { data: vehicles, error } = await supabase
+            .from('vehicles')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        res.status(200).json({ success: true, count: vehicles.length, data: vehicles });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    }
+};
+
+// @desc    Get single vehicle
+// @route   GET /api/vehicles/:id
+// @access  Public
+const getVehicleById = async (req, res) => {
+    try {
+        const { data: vehicle, error } = await supabase
+            .from('vehicles')
+            .select('*')
+            .eq('id', req.params.id)
+            .single();
+
+        if (error || !vehicle) {
+            return res.status(404).json({ success: false, message: 'Vehicle not found' });
+        }
+        res.status(200).json({ success: true, data: vehicle });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    }
+};
+
+// @desc    Create new vehicle
+// @route   POST /api/vehicles
+// @access  Private (Admin only)
+const createVehicle = async (req, res) => {
+    try {
+        const { data: vehicle, error } = await supabase
+            .from('vehicles')
+            .insert([req.body])
+            .select();
+
+        if (error) throw error;
+        res.status(201).json({ success: true, data: vehicle[0] });
+    } catch (error) {
+        res.status(400).json({ success: false, message: 'Failed to create vehicle', error: error.message });
+    }
+};
+
+// @desc    Update vehicle
+// @route   PUT /api/vehicles/:id
+// @access  Private (Admin only)
+const updateVehicle = async (req, res) => {
+    try {
+        const { data: vehicle, error } = await supabase
+            .from('vehicles')
+            .update(req.body)
+            .eq('id', req.params.id)
+            .select();
+
+        if (error || vehicle.length === 0) {
+            return res.status(404).json({ success: false, message: 'Vehicle not found or update failed' });
+        }
+        res.status(200).json({ success: true, data: vehicle[0] });
+    } catch (error) {
+        res.status(400).json({ success: false, message: 'Failed to update vehicle', error: error.message });
+    }
+};
+
+// @desc    Delete vehicle
+// @route   DELETE /api/vehicles/:id
+// @access  Private (Admin only)
+const deleteVehicle = async (req, res) => {
+    try {
+        const { error } = await supabase
+            .from('vehicles')
+            .delete()
+            .eq('id', req.params.id);
+
+        if (error) throw error;
+        res.status(200).json({ success: true, message: 'Vehicle deleted successfully' });
+    } catch (error) {
+        res.status(400).json({ success: false, message: 'Failed to delete vehicle', error: error.message });
+    }
+};
+
+module.exports = {
+    getVehicles,
+    getVehicleById,
+    createVehicle,
+    updateVehicle,
+    deleteVehicle
+};
+
+├── 📄 cookie.txt
+└── 📂 locales/
+│  ├── 📄 ar.json
+│  ├── 📄 de.json
+│  ├── 📄 en.json
+│  ├── 📄 es.json
+│  ├── 📄 fr.json
+│  ├── 📄 hi.json
+│  ├── 📄 it.json
+│  ├── 📄 ja.json
+│  ├── 📄 ru.json
+│  ├── 📄 tr.json
+│  ├── 📄 vi.json
+│  ├── 📄 zh.json
+└── 📂 middlewares/
+│  ├── 📄 authMiddleware.js
+const jwt = require('jsonwebtoken');
+const supabase = require('../config/supabase');
+
+// For API routes (returns JSON)
+const protect = async (req, res, next) => {
+  let token = req.cookies.token || (req.headers.authorization && req.headers.authorization.split(' ')[1]);
+
+  if (!token) return res.status(401).json({ success: false, message: 'Not authorized' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { data: admin, error } = await supabase.from('admins').select('id, username').eq('id', decoded.id).single();
+
+    if (error || !admin) return res.status(401).json({ success: false, message: 'Admin not found' });
+
+    req.admin = admin;
+    next();
+  } catch (error) {
+    return res.status(401).json({ success: false, message: 'Token failed' });
+  }
+};
+
+// For EJS Views (Redirects to the NEW admin login page)
+const requireAuth = async (req, res, next) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.redirect('/admin/login'); // Fixed!
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { data: admin, error } = await supabase.from('admins').select('id, username').eq('id', decoded.id).single();
+
+    if (error || !admin) {
+      return res.redirect('/admin/login'); // Fixed!
+    }
+
+    req.admin = admin;
+    next();
+  } catch (error) {
+    return res.redirect('/admin/login'); // Fixed!
+  }
+};
+
+module.exports = { protect, requireAuth };
+
+│  ├── 📄 errorHandler.js - (empty file) 
+└── 📂 migrations/
+
+
+│  ├── 📄 Booking.js 
+async function sendToWhatsApp() {
+    // 1. Check if Terms are accepted
+    if (!document.getElementById('terms').checked) {
+        alert("Please agree to the Terms and Conditions first.");
+        return;
+    }
+
+    // Change button text to show loading
+    const btn = document.querySelector('button[onclick="sendToWhatsApp()"]');
+    const originalText = btn.innerText;
+    btn.innerText = "PROCESSING...";
+    btn.disabled = true;
+
+    // 2. Collect all data (Added trip_type and backup_phone)
+    const bookingData = {
+        trip_type: document.querySelector('input[name="trip_type"]:checked')?.value || 'N/A',
+        province: document.getElementById('province').value || 'N/A',
+        departure: document.getElementById('departure').value || 'N/A',
+        destination: document.getElementById('destination').value || 'N/A',
+        date: document.getElementById('date').value || 'N/A',
+        time: document.getElementById('time').value || 'N/A',
+        direction: document.querySelector('input[name="direction"]:checked')?.value || 'N/A',
+        bags: document.querySelector('input[name="bags"]:checked')?.value || 'N/A',
+        car_type: document.querySelector('input[name="car_type"]:checked')?.value || 'N/A',
+        airport: document.getElementById('airport').checked ? "Yes / نعم" : "No / لا",
+        customer_name: document.getElementById('customer_name').value || 'N/A',
+        customer_phone: document.getElementById('customer_phone').value || 'N/A',
+        backup_phone: document.getElementById('backup_phone').value || 'N/A',
+        passengers: document.getElementById('passengers').value || '1',
+        notes: document.getElementById('notes').value || 'None'
+    };
+
+    try {
+        // 3. Send to Backend to save in Supabase and generate Trip Number
+        const response = await fetch('/api/bookings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bookingData)
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.message);
+        }
+
+        const tripNum = result.tripNum; // The auto-generated number from backend
+
+        // 4. Format the WhatsApp message
+        const message = `✨ *New VIP Booking Request* ✨
+--------------------------------
+🆔 *Trip ID:* ${tripNum}
+🛣️ *Trip Type:* ${bookingData.trip_type}
+📍 *Province:* ${bookingData.province}
+🛫 *From:* ${bookingData.departure}
+🏁 *To:* ${bookingData.destination}
+📅 *Date:* ${bookingData.date}
+⏰ *Time:* ${bookingData.time}
+--------------------------------
+🔄 *Direction:* ${bookingData.direction}
+✈️ *Airport Trip:* ${bookingData.airport}
+🧳 *Bags:* ${bookingData.bags}
+🚗 *Car:* ${bookingData.car_type}
+--------------------------------
+👤 *Customer:* ${bookingData.customer_name}
+📞 *Phone:* ${bookingData.customer_phone}
+📱 *Backup Phone:* ${bookingData.backup_phone}
+👥 *Passengers:* ${bookingData.passengers}
+📝 *Notes:* ${bookingData.notes}
+--------------------------------`;
+
+        // 5. Open WhatsApp
+        const whatsappUrl = `https://wa.me/201111036937?text=${encodeURIComponent(message )}`;
+        window.open(whatsappUrl, '_blank');
+
+        // Reset form and button
+        document.getElementById('bookingForm').reset();
+        btn.innerText = originalText;
+        btn.disabled = false;
+
+    } catch (error) {
+        alert("Error saving booking. Please try again.");
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+}
+
+
+├── 📄 package-lock.json
+├── 📄 package.json
+{
+  "dependencies": {
+    "@supabase/supabase-js": "^2.109.0",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "i18n": "^0.15.3",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.11.0",
+    "multer": "^2.2.0",
+    "ws": "^8.21.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  }
+}
+
+└── 📂 public/
+│  └── 📂 css/
+│  └── 📂 images/
+│    ├── 📄 h18.png
+│    ├── 📄 microbus.png
+│    ├── 📄 sedan.png
+│    ├── 📄 suv.png
+│    ├── 📄 suv7.png
+│    ├── 📄 vip.png
+│  └── 📂 js/
+│    ├── 📄 booking.js
+async function sendToWhatsApp() {
+    // 1. Check if Terms are accepted
+    if (!document.getElementById('terms').checked) {
+        alert("Please agree to the Terms and Conditions first.");
+        return;
+    }
+
+    // Change button text to show loading
+    const btn = document.querySelector('button[onclick="sendToWhatsApp()"]');
+    const originalText = btn.innerText;
+    btn.innerText = "PROCESSING...";
+    btn.disabled = true;
+
+    // 2. Collect all data
+    const bookingData = {
+        province: document.getElementById('province').value || 'N/A',
+        departure: document.getElementById('departure').value || 'N/A',
+        destination: document.getElementById('destination').value || 'N/A',
+        date: document.getElementById('date').value || 'N/A',
+        time: document.getElementById('time').value || 'N/A',
+        direction: document.querySelector('input[name="direction"]:checked').value,
+        bags: document.querySelector('input[name="bags"]:checked').value,
+        car_type: document.querySelector('input[name="car_type"]:checked').value,
+        airport: document.getElementById('airport').checked ? "Yes / نعم" : "No / لا",
+        customer_name: document.getElementById('customer_name').value || 'N/A',
+        customer_phone: document.getElementById('customer_phone').value || 'N/A',
+        passengers: document.getElementById('passengers').value || '1',
+        notes: document.getElementById('notes').value || 'None'
+    };
+
+    try {
+        // 3. Send to Backend to save in Supabase and generate Trip Number
+        const response = await fetch('/api/bookings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bookingData)
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.message);
+        }
+
+        const tripNum = result.tripNum; // The auto-generated number from backend
+
+        // 4. Format the WhatsApp message
+        const message = `✨ *New VIP Booking Request* ✨
+--------------------------------
+🆔 *Trip ID:* ${tripNum}
+📍 *Province:* ${bookingData.province}
+🛫 *From:* ${bookingData.departure}
+🏁 *To:* ${bookingData.destination}
+📅 *Date:* ${bookingData.date}
+⏰ *Time:* ${bookingData.time}
+--------------------------------
+🔄 *Type:* ${bookingData.direction}
+✈️ *Airport Trip:* ${bookingData.airport}
+🧳 *Bags:* ${bookingData.bags}
+🚗 *Car:* ${bookingData.car_type}
+--------------------------------
+👤 *Customer:* ${bookingData.customer_name}
+📞 *Phone:* ${bookingData.customer_phone}
+👥 *Passengers:* ${bookingData.passengers}
+📝 *Notes:* ${bookingData.notes}
+--------------------------------`;
+
+        // 5. Open WhatsApp
+        const whatsappUrl = `https://wa.me/201111036937?text=${encodeURIComponent(message )}`;
+        window.open(whatsappUrl, '_blank');
+
+        // Reset form and button
+        document.getElementById('bookingForm').reset();
+        btn.innerText = originalText;
+        btn.disabled = false;
+
+    } catch (error) {
+        alert("Error saving booking. Please try again.");
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+}
+
+│    ├── 📄 login.js
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault(); // Stop default GET request
+
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData.entries());
+  const errorMsg = document.getElementById('error-msg');
+
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Save the cookie
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      window.location.href = '/admin/dashboard';
+    } else {
+      errorMsg.textContent = result.message;
+      errorMsg.style.display = 'block';
+    }
+  } catch (error) {
+    errorMsg.textContent = 'An error occurred. Please try again.';
+    errorMsg.style.display = 'block';
+  }
+});
+
+├── 📄 readme.md
+└── 📂 routes/
+│  ├── 📄 adminRoutes.js
+const express = require('express');
+const router = express.Router();
+const multer = require('multer'); // Import multer
+const { requireAuth } = require('../middlewares/authMiddleware');
+const { renderLogin, getDashboard, addVehicle, deleteVehicle , deleteBooking} = require('../controllers/adminController');
+
+// Configure multer to store files in memory temporarily before sending to Supabase
+const upload = multer({ storage: multer.memoryStorage() });
+
+// Public Admin Route
+router.get('/login', renderLogin);
+
+// Protected Admin Routes (Require Login)
+router.use(requireAuth);
+
+router.get('/', (req, res) => res.redirect('/admin/dashboard'));
+router.get('/dashboard', getDashboard);
+
+// Add the upload middleware here (expects a file field named 'image')
+router.post('/vehicles', upload.single('image'), addVehicle); 
+
+router.post('/vehicles/delete/:id', deleteVehicle);
+router.post('/bookings/delete/:id', deleteBooking); // Add this line
+
+module.exports = router;
+
+│  ├── 📄 authRoutes.js
+const express = require('express');
+const router = express.Router();
+const {renderLogin, login, logout } = require('../controllers/authController');
+
+router.get('/login', renderLogin); // Add this line to show the page
+router.post('/login', login);
+router.get('/logout', logout);
+
+module.exports = router;
+
+│  ├── 📄 bookingRoutes.js
+const express = require('express');
+const router = express.Router();
+const supabase = require('../config/supabase');
+
+router.post('/', async (req, res) => {
+    try {
+        // Generate a custom Trip Number (e.g., VIP-84923)
+        const tripNum = 'VIP-' + Math.floor(10000 + Math.random() * 90000);
+        
+        // Add trip_num to the incoming data
+        const bookingData = { ...req.body, trip_num: tripNum };
+
+        // Save to Supabase
+        const { data, error } = await supabase
+            .from('bookings')
+            .insert([bookingData])
+            .select();
+
+        if (error) throw error;
+
+        // Send the generated trip number back to the frontend
+        res.status(201).json({ success: true, tripNum: tripNum });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+module.exports = router;
+
+│  ├── 📄 publicRoutes.js
+const express = require('express');
+const router = express.Router();
+const { getHomePage } = require('../controllers/publicController');
+// Language Switcher Route
+router.get('/lang/:locale', (req, res) => {
+  const supportedLocales = ['en', 'ar', 'fr', 'zh', 'hi', 'vi', 'ja', 'de', 'it', 'es', 'ru', 'tr'];
+  const requestedLocale = req.params.locale;
+  
+  // Validate the requested locale
+  if (supportedLocales.includes(requestedLocale)) {
+    // Set the cookie to the requested language
+    res.cookie('lang', requestedLocale, { maxAge: 900000, httpOnly: true });
+    console.log(`[DEBUG] Language switch requested: ${requestedLocale}`);
+  } else {
+    console.log(`[DEBUG] Invalid language requested: ${requestedLocale}, falling back to 'en'`);
+    res.cookie('lang', 'en', { maxAge: 900000, httpOnly: true });
+  }
+
+  // Redirect back to the homepage
+  res.redirect('/');
+});
+// Public Homepage Route
+router.get('/', getHomePage);
+
+module.exports = router;
+
+│  ├── 📄 vehicleRoutes.js
+const express = require('express');
+const router = express.Router();
+const { protect } = require('../middlewares/authMiddleware');
+const {
+    getVehicles,
+    getVehicleById,
+    createVehicle,
+    updateVehicle,
+    deleteVehicle
+} = require('../controllers/vehicleController');
+
+// Public routes
+router.get('/', getVehicles);
+router.get('/:id', getVehicleById);
+
+// Protected routes (Require Admin Login)
+router.post('/', protect, createVehicle);
+router.put('/:id', protect, updateVehicle);
+router.delete('/:id', protect, deleteVehicle);
+
+module.exports = router;
+
+├── 📄 seed.js
+const supabase = require('./config/supabase');
+const bcrypt = require('bcryptjs');
+
+const seedDatabase = async () => {
+    try {
+        console.log('Connecting to Supabase...');
+
+        // 1. Clear existing data (optional, prevents duplicates during testing)
+        await supabase.from('admins').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('vehicles').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        console.log('Previous data cleared.');
+
+        // 2. Hash the password for the Admin
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash('password123', salt);
+
+        // 3. Insert Admin
+        const { data: admin, error: adminError } = await supabase
+            .from('admins')
+            .insert([{ username: 'admin', password: hashedPassword }])
+            .select();
+            
+        if (adminError) throw adminError;
+        console.log(`Admin created successfully: ${admin[0].username}`);
+
+        // 4. Insert Vehicle
+        const { data: vehicle, error: vehicleError } = await supabase
+            .from('vehicles')
+            .insert([{
+                name: 'Mercedes-Benz S-Class',
+                category: 'Sedan',
+                passengers: 3,
+                luggage: 2,
+                image_url: '/images/s-class.jpg',
+                desc_en: 'The ultimate luxury sedan for VIP transport.',
+                desc_ar: 'سيارة السيدان الفاخرة المطلقة لنقل كبار الشخصيات.'
+            }])
+            .select();
+
+        if (vehicleError) throw vehicleError;
+        console.log(`Vehicle created successfully: ${vehicle[0].name}`);
+
+        console.log('Database seeding completed successfully!');
+        process.exit();
+    } catch (error) {
+        console.error(`Error seeding database:`, error.message || error);
+        process.exit(1);
+    }
+};
+
+seedDatabase();
+
+├── 📄 server.js
+const supabase = require('./config/supabase');
+const bcrypt = require('bcryptjs');
+
+const seedDatabase = async () => {
+    try {
+        console.log('Connecting to Supabase...');
+
+        // 1. Clear existing data (optional, prevents duplicates during testing)
+        await supabase.from('admins').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('vehicles').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        console.log('Previous data cleared.');
+
+        // 2. Hash the password for the Admin
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash('password123', salt);
+
+        // 3. Insert Admin
+        const { data: admin, error: adminError } = await supabase
+            .from('admins')
+            .insert([{ username: 'admin', password: hashedPassword }])
+            .select();
+            
+        if (adminError) throw adminError;
+        console.log(`Admin created successfully: ${admin[0].username}`);
+
+        // 4. Insert Vehicle
+        const { data: vehicle, error: vehicleError } = await supabase
+            .from('vehicles')
+            .insert([{
+                name: 'Mercedes-Benz S-Class',
+                category: 'Sedan',
+                passengers: 3,
+                luggage: 2,
+                image_url: '/images/s-class.jpg',
+                desc_en: 'The ultimate luxury sedan for VIP transport.',
+                desc_ar: 'سيارة السيدان الفاخرة المطلقة لنقل كبار الشخصيات.'
+            }])
+            .select();
+
+        if (vehicleError) throw vehicleError;
+        console.log(`Vehicle created successfully: ${vehicle[0].name}`);
+
+        console.log('Database seeding completed successfully!');
+        process.exit();
+    } catch (error) {
+        console.error(`Error seeding database:`, error.message || error);
+        process.exit(1);
+    }
+};
+
+seedDatabase();
+
+└── 📂 utils/
+└── 📂 views/
+│  └── 📂 admin/
+│    ├── 📄 dashboard.ejs
+<!DOCTYPE html>
+<html lang="en" class="dark"> <!-- Default to dark mode for that VIP feel -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Admin Portal</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gold: { 400: '#e8c56a', 500: '#d4af37', 600: '#a88b2c' },
+                        dark: { 900: '#0a0a0a', 800: '#121212', 700: '#1a1a1a' }
+                    },
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Animations & Utilities */
+        body { transition: background-color 0.5s ease, color 0.5s ease; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7 );
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass-panel {
+            background: rgba(26, 26, 26, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #a88b2c 0%, #d4af37 50%, #e8c56a 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #a88b2c; }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-dark-900 text-gray-800 dark:text-gray-200 font-sans antialiased selection:bg-gold-500 selection:text-white">
+
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity opacity-0"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-72 glass-panel shadow-2xl z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-500 ease-in-out flex flex-col border-r border-gray-200 dark:border-white/5">
+        <div class="p-8 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gold-600 to-gold-400 flex items-center justify-center text-black font-bold text-xl shadow-lg shadow-gold-500/30">V</div>
+                <h2 class="text-2xl font-serif font-bold tracking-widest dark:text-white">VIP<span class="gold-gradient-text">ADMIN</span></h2>
+            </div>
+            <button onclick="toggleSidebar()" class="lg:hidden text-gray-500 dark:text-gray-400 hover:text-gold-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <nav class="flex-1 px-6 space-y-2 overflow-y-auto">
+            <a href="/admin/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gold-500/10 text-gold-600 dark:text-gold-400 font-medium border border-gold-500/20 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                Dashboard
+            </a>
+        </nav>
+
+        <div class="p-6 border-t border-gray-200 dark:border-white/5">
+            <div class="flex items-center gap-3 mb-6 px-2">
+                <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-dark-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold">
+                    <%= admin.username.charAt(0).toUpperCase() %>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Logged in as</p>
+                    <p class="text-sm font-bold dark:text-white"><%= admin.username %></p>
+                </div>
+            </div>
+            <a href="/api/auth/logout" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 font-semibold hover:bg-red-500 hover:text-white transition-all duration-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Secure Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 lg:ml-72 flex flex-col h-screen overflow-hidden relative">
+        
+        <!-- Top Header -->
+        <header class="glass-panel sticky top-0 z-30 px-6 py-4 flex justify-between items-center border-b border-gray-200 dark:border-white/5">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-gray-300 hover:text-gold-500 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <h1 class="text-xl md:text-2xl font-serif font-bold dark:text-white">Overview</h1>
+            </div>
+            
+            <!-- Theme Toggle -->
+            <button onclick="toggleTheme()" class="p-2.5 rounded-full bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-gold-400 hover:shadow-lg hover:shadow-gold-500/20 transition-all duration-300 group">
+                <!-- Sun Icon (shows in dark mode) -->
+                <svg class="w-5 h-5 hidden dark:block group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <!-- Moon Icon (shows in light mode) -->
+                <svg class="w-5 h-5 block dark:hidden group-hover:-rotate-12 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
+        </header>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 pb-24">
+            
+            <!-- Add Vehicle Form -->
+            <div class="glass-panel rounded-2xl p-6 md:p-8 shadow-xl fade-in-up">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-lg bg-gold-500/20 flex items-center justify-center text-gold-500">🚗</div>
+                    <h2 class="text-xl font-serif font-bold dark:text-white">Add New Vehicle</h2>
+                </div>
+                
+                <div id="formErrors" class="hidden mb-6 bg-red-500/10 border border-red-500/50 rounded-xl p-4 text-red-600 dark:text-red-400 text-sm backdrop-blur-md"></div>
+
+                <form id="addVehicleForm" action="/admin/vehicles" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Vehicle Name</label>
+                        <input type="text" name="name" id="v_name" required class="w-full bg-white dark:bg-dark-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-gray-800 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none shadow-inner">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</label>
+                        <select name="category" id="v_category" required class="w-full bg-white dark:bg-dark-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-gray-800 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none shadow-inner appearance-none">
+                            <option value="Sedan">Sedan</option><option value="SUV">SUV</option><option value="Van">Van</option><option value="Minivan">Minivan</option><option value="Limousine">Limousine</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Passengers</label>
+                        <input type="number" name="passengers" id="v_passengers" min="1" required class="w-full bg-white dark:bg-dark-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-gray-800 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none shadow-inner">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Luggage Capacity</label>
+                        <input type="number" name="luggage" id="v_luggage" min="0" required class="w-full bg-white dark:bg-dark-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-gray-800 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none shadow-inner">
+                    </div>
+                    <div class="md:col-span-2 space-y-1">
+                        <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Vehicle Image <span class="text-gray-400 dark:text-gray-500 lowercase normal-case">(Max 5MB, JPG/PNG/WEBP)</span></label>
+                        <input type="file" name="image" id="v_image" accept="image/jpeg, image/png, image/webp" required class="w-full bg-gray-50 dark:bg-dark-800/50 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-4 text-gray-800 dark:text-gray-300 focus:ring-2 focus:ring-gold-500 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gold-500/10 file:text-gold-600 dark:file:text-gold-400 hover:file:bg-gold-500/20 cursor-pointer">
+                    </div>
+                    <div class="md:col-span-2 space-y-1">
+                        <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Description (English)</label>
+                        <textarea name="desc_en" id="v_desc_en" required rows="2" class="w-full bg-white dark:bg-dark-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-gray-800 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none shadow-inner resize-none"></textarea>
+                    </div>
+                    <div class="md:col-span-2 space-y-1">
+                        <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Description (Arabic)</label>
+                        <textarea name="desc_ar" id="v_desc_ar" required rows="2" class="w-full bg-white dark:bg-dark-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-gray-800 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none shadow-inner resize-none text-right" dir="rtl"></textarea>
+                    </div>
+                    <div class="md:col-span-2 pt-4">
+                        <button type="submit" id="submitBtn" class="w-full md:w-auto bg-gradient-to-r from-gold-600 via-gold-500 to-gold-400 text-black font-bold px-8 py-3.5 rounded-xl hover:shadow-lg hover:shadow-gold-500/40 hover:-translate-y-0.5 transition-all duration-300 uppercase tracking-widest text-sm">
+                            Add to Fleet
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bookings Table -->
+            <div class="glass-panel rounded-2xl shadow-xl overflow-hidden fade-in-up delay-100">
+                <div class="p-6 border-b border-gray-200 dark:border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/50 dark:bg-dark-800/50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-gold-500/20 flex items-center justify-center text-gold-500">📅</div>
+                        <h2 class="text-xl font-serif font-bold dark:text-white">Recent Bookings</h2>
+                    </div>
+                    <div class="relative w-full sm:w-80">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <input type="text" id="searchBookings" onkeyup="filterTable()" placeholder="Search trip #, name, phone..." class="w-full pl-11 pr-4 py-2.5 bg-gray-100 dark:bg-dark-900 border border-transparent dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-gold-500 focus:bg-white dark:focus:bg-dark-800 transition-all outline-none dark:text-white placeholder-gray-400">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700/50" id="bookingsTable">
+                        <thead class="bg-gray-50/50 dark:bg-dark-800/50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Trip Details</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Customer</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Route</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700/50 bg-white/30 dark:bg-transparent">
+                            <% if (bookings.length === 0) { %>
+                                <tr id="noResultsRow"><td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 font-medium">No bookings found.</td></tr>
+                            <% } %>
+                            
+                            <% bookings.forEach(booking => { %>
+                            <tr class="hover:bg-gray-50/80 dark:hover:bg-dark-800/50 transition-colors duration-200 booking-row group">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-bold text-gold-600 dark:text-gold-400 trip-id mb-1"><%= booking.trip_num %></div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> <%= booking.date %></div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <%= booking.time %></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap customer-info">
+                                    <div class="text-sm font-bold text-gray-900 dark:text-white"><%= booking.customer_name %></div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">📞 <%= booking.customer_phone %></div>
+                                    <% if (booking.backup_phone && booking.backup_phone !== 'N/A') { %>
+                                        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">📱 <%= booking.backup_phone %></div>
+                                    <% } %>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap route-info">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-dark-700 text-gray-800 dark:text-gray-300 mb-2 border border-gray-200 dark:border-gray-600">
+                                        <%= booking.trip_type || 'Standard' %>
+                                    </span>
+                                    <div class="text-sm text-gray-600 dark:text-gray-3
+00"><span class="font-semibold text-gray-900 dark:text-gray-200">From:</span> <%= booking.departure %></div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-300 mt-0.5"><span class="font-semibold text-gray-900 dark:text-gray-200">To:</span> <%= booking.destination %></div>
+                                </td>
+                                
+                                <!-- Status Column -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <form action="/admin/bookings/status/<%= booking.id %>" method="POST">
+                                        <% 
+                                            const status = booking.status || 'Pending';
+                                            let colorClass = 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800/50';
+                                            if (status === 'Confirmed') colorClass = 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50';
+                                            if (status === 'Completed') colorClass = 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800/50';
+                                            if (status === 'Cancelled') colorClass = 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/50';
+                                        %>
+                                        <select name="status" onchange="this.form.submit()" class="text-xs font-bold rounded-full px-4 py-1.5 border cursor-pointer focus:outline-none focus:ring-2 focus:ring-gold-500 focus:ring-offset-1 dark:focus:ring-offset-dark-900 transition-all appearance-none text-center shadow-sm <%= colorClass %>">
+                                            <option value="Pending" <%= status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                            <option value="Confirmed" <%= status === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
+                                            <option value="Completed" <%= status === 'Completed' ? 'selected' : '' %>>Completed</option>
+                                            <option value="Cancelled" <%= status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                        </select>
+                                    </form>
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button type="button" onclick="openDeleteModal('/admin/bookings/delete/<%= booking.id %>', 'booking')" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 px-4 py-2 rounded-xl transition-all duration-300 opacity-0 group-hover:opacity-100 focus:opacity-100">Delete</button>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Vehicles Table -->
+            <div class="glass-panel rounded-2xl shadow-xl overflow-hidden fade-in-up delay-200">
+                <div class="p-6 border-b border-gray-200 dark:border-white/5 flex items-center gap-3 bg-white/50 dark:bg-dark-800/50">
+                    <div class="w-8 h-8 rounded-lg bg-gold-500/20 flex items-center justify-center text-gold-500">🚘</div>
+                    <h2 class="text-xl font-serif font-bold dark:text-white">Current Fleet</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700/50">
+                        <thead class="bg-gray-50/50 dark:bg-dark-800/50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Vehicle</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Capacity</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700/50 bg-white/30 dark:bg-transparent">
+                            <% if (vehicles.length === 0) { %>
+                                <tr><td colspan="4" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 font-medium">No vehicles found. Add one above!</td></tr>
+                            <% } %>
+                            <% vehicles.forEach(vehicle => { %>
+                            <tr class="hover:bg-gray-50/80 dark:hover:bg-dark-800/50 transition-colors duration-200 group">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-4">
+                                        <img src="<%= vehicle.image_url %>" alt="<%= vehicle.name %>" class="w-14 h-14 rounded-xl object-cover border border-gray-200 dark:border-gray-700 shadow-sm">
+                                        <div class="text-sm font-bold text-gray-900 dark:text-white"><%= vehicle.name %></div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 dark:bg-dark-700 text-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-600"><%= vehicle.category %></span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    <span class="mr-4 flex items-center gap-1 inline-flex"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> <%= vehicle.passengers %></span>
+                                    <span class="flex items-center gap-1 inline-flex"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg> <%= vehicle.luggage %></span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button type="button" onclick="openDeleteModal('/admin/vehicles/delete/<%= vehicle.id %>', 'vehicle')" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 px-4 py-2 rounded-xl transition-all duration-300 opacity-0 group-hover:opacity-100 focus:opacity-100">Delete</button>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div id="deleteModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/60 backdrop-blur-md transition-opacity duration-300 opacity-0">
+        <div id="deleteModalContent" class="glass-panel rounded-3xl shadow-2xl p-8 w-full max-w-sm transform transition-all duration-300 scale-95 opacity-0 border border-white/10">
+            <div class="flex items-center justify-center w-16 h-16 mx-auto bg-red-500/10 rounded-full mb-6 border border-red-500/20">
+                <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-2xl font-serif font-bold text-center text-gray-900 dark:text-white mb-2">Confirm Deletion</h3>
+            <p id="deleteModalText" class="text-sm text-gray-500 dark:text-gray-400 text-center mb-8">Are you sure you want to delete this item? This action cannot be undone.</p>
+            <div class="flex justify-center gap-4">
+                <button type="button" onclick="closeDeleteModal()" class="px-6 py-3 bg-gray-100 dark:bg-dark-800 text-gray-800 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-dark-700 transition-colors w-1/2">Cancel</button>
+                <form id="confirmDeleteForm" method="POST" action="" class="w-1/2">
+                    <button type="submit" class="w-full px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors shadow-lg shadow-red-600/30">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // --- Theme Toggle Logic ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (            html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Initialize theme from local storage on page load
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark'); // Default to dark mode
+        }
+
+        // --- Sidebar Toggle Logic (Mobile) ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                // Open Sidebar
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                // Small delay to allow display:block to apply before animating opacity
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                // Close Sidebar
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        // --- Search/Filter Logic ---
+        function filterTable() {
+            const input = document.getElementById("searchBookings");
+            const filter = input.value.toLowerCase();
+            const rows = document.querySelectorAll(".booking-row");
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const tripId = row.querySelector(".trip-id").textContent.toLowerCase();
+                const customerInfo = row.querySelector(".customer-info").textContent.toLowerCase();
+                const routeInfo = row.querySelector(".route-info").textContent.toLowerCase();
+                
+                if (tripId.includes(filter) || customerInfo.includes(filter) || routeInfo.includes(filter)) {
+                    row.style.display = "";
+                    visibleCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            let noResultsRow = document.getElementById("noResultsRow");
+            if (visibleCount === 0 && rows.length > 0) {
+                if (!noResultsRow) {
+                    const tbody = document.querySelector("#bookingsTable tbody");
+                    noResultsRow = document.createElement("tr");
+                    noResultsRow.id = "noResultsRow";
+                    noResultsRow.innerHTML = `<td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 font-medium">No bookings match your search "${input.value}".</td>`;
+                    tbody.appendChild(noResultsRow);
+                } else {
+                    noResultsRow.style.display = "";
+                    noResultsRow.innerHTML = `<td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 font-medium">No bookings match your search "${input.value}".</td>`;
+                }
+            } else if (noResultsRow) {
+                noResultsRow.style.display = "none";
+            }
+        }
+
+        // --- Modal Logic ---
+        function openDeleteModal(actionUrl, itemType) {
+            const modal = document.getElementById('deleteModal');
+            const modalContent = document.getElementById('deleteModalContent');
+            const form = document.getElementById('confirmDeleteForm');
+            const text = document.getElementById('deleteModalText');
+
+            form.action = actionUrl;
+            text.innerText = `Are you sure you want to delete this ${itemType}? This action cannot be undone.`;
+            
+            modal.classList.remove('hidden');
+            
+            // Trigger reflow to ensure animation plays
+            void modal.offsetWidth;
+            
+            modal.classList.remove('opacity-0');
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }
+
+        function closeDeleteModal() {
+            const modal = document.getElementById('deleteModal');
+            const modalContent = document.getElementById('deleteModalContent');
+
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            modal.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Close modal when clicking on the dark overlay background
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteModal();
+        });
+
+        // --- Form Validation Logic ---
+        document.getElementById('addVehicleForm').addEventListener('submit', function(e) {
+            const errors = [];
+            const errorDiv = document.getElementById('formErrors');
+            
+            const name = document.getElementById('v_name').value.trim();
+            const passengers = parseInt(document.getElementById('v_passengers').value);
+            const luggage = parseInt(document.getElementById('v_luggage').value);
+            const descEn = document.getElementById('v_desc_en').value.trim();
+            const descAr = document.getElementById('v_desc_ar').value.trim();
+            const imageFile = document.getElementById('v_image').files[0];
+
+            if (name.length < 2) errors.push("Vehicle name must be at least 2 characters long.");
+            if (passengers < 1) errors.push("Passengers must be at least 1.");
+            if (luggage < 0) errors.push("Luggage capacity cannot be negative.");
+            if (descEn.length < 10) errors.push("English description must be at least 10 characters.");
+            if (descAr.length < 10) errors.push("Arabic description must be at least 10 characters.");
+
+            if (imageFile) {
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+                if (!allowedTypes.includes(imageFile.type)) errors.push("Image must be a JPG, PNG, or WEBP file.");
+                if (imageFile.size > maxSize) errors.push("Image size must be less than 5MB.");
+            }
+
+            if (errors.length > 0) {
+                e.preventDefault();
+                errorDiv.innerHTML = '<ul class="list-disc pl-5 space-y-1">' + errors.map(err => `<li>${err}</li>`).join('') + '</ul>';
+                errorDiv.classList.remove('hidden');
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                errorDiv.classList.add('hidden');
+                const btn = document.getElementById('submitBtn');
+                // Add a luxurious loading spinner to the button
+                btn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-black inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Uploading...';
+                btn.classList.add('opacity-75', 'cursor-not-allowed' );
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+│    ├── 📄 login.ejs
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - VIP For Cars</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">VIP Admin Portal</h2>
+        <div id="error-msg" class="hidden bg-red-100 text-red-700 p-3 rounded mb-4 text-center text-sm"></div>
+        
+        <form id="loginForm" class="space-y-5">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
+                <input type="text" name="username" required class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800">
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                <input type="password" name="password" required class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800">
+            </div>
+            <button type="submit" class="w-full bg-gray-900 text-white font-bold py-2 px-4 rounded hover:bg-gray-800 transition duration-200">Login</button>
+        </form>
+    </div>
+
+    <!-- Reusing our working JS file! -->
+    <script src="/js/login.js"></script>
+</body>
+</html>
+
+│  ├── 📄 index.ejs
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="<%= lang === 'ar' ? 'rtl' : 'ltr' %>" class="dark">
+<head>
+    <%- include('partials/head') %>
+    <!-- Prevent Flash of Unstyled Content (FOUC) -->
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+<body class="bg-light-50 dark:bg-dark-900 text-gray-900 dark:text-white font-sans antialiased transition-colors duration-500 selection:bg-gold-500 selection:text-white">
+
+    <%- include('partials/navbar') %>
+    <%- include('partials/hero') %>
+    <%- include('partials/fleet') %>
+    <%- include('partials/services') %>
+    <%- include('partials/contact') %>
+    <%- include('partials/footer') %>
+    <%- include('partials/floating-buttons') %>
+    <%- include('partials/scripts') %>
+    
+    <script src="/js/booking.js"></script>
+</body>
+</html>
+
+│  └── 📂 partials/
+│    ├── 📄 contact.ejs
+<section id="contact" class="py-24 lg:py-32 px-6 relative noise-bg">
+  <!-- Decorative Glow -->
+  <div class="absolute top-20 right-10 w-96 h-96 rounded-full bg-gold-500/10 blur-[100px] pointer-events-none"></div>
+  <div class="absolute bottom-20 left-10 w-96 h-96 rounded-full bg-gold-500/10 blur-[100px] pointer-events-none"></div>
+  
+  <div class="max-w-6xl mx-auto relative z-10">
+    
+    <!-- Header -->
+    <div class="text-center mb-16 fade-in">
+      <span class="text-sm tracking-[0.3em] text-gray-500 dark:text-gray-400 uppercase"><%= __('CONTACT_SUBTITLE') %></span>
+      <h2 class="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-6 text-gray-900 dark:text-white mt-4"><%= __('CONTACT_TITLE') %></h2>
+      <div class="w-20 h-1 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-400 mx-auto mb-6"></div>
+      <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"><%= __('CONTACT_SUB') %></p>
+    </div>
+
+    <form id="bookingForm" class="glass-card p-8 lg:p-12 rounded-3xl fade-in w-full shadow-2xl">
+      
+      <!-- 1. Trip Details -->
+      <div class="mb-10">
+        <h3 class="text-xl font-serif font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+          <span class="w-8 h-8 rounded-full bg-gold-500/20 flex items-center justify-center text-gold-600 dark:text-gold-400 text-sm">1</span>
+          <%= __('STEP_TRIP_DETAILS') %>
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <% const inputs = [
+            { id: 'province', type: 'select', label: __('FORM_PROVINCE'), options: ['Cairo', 'Giza', 'Alexandria', 'Other'] },
+            { id: 'departure', type: 'text', label: __('FORM_DEPARTURE') },
+            { id: 'destination', type: 'text', label: __('FORM_DESTINATION') },
+            { id: 'date', type: 'date', label: __('FORM_DATE') },
+            { id: 'time', type: 'time', label: __('FORM_TIME') }
+          ]; %>
+          
+          <% inputs.forEach(input => { %>
+          <div class="group">
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"><%= input.label %></label>
+            <% if(input.type === 'select') { %>
+              <select id="<%= input.id %>" class="w-full bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-2xl p-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none appearance-none shadow-inner">
+                <option value="" disabled selected><%= input.label %></option>
+                <% input.options.forEach(opt => { %><option value="<%= opt %>"><%= opt %></option><% }) %>
+              </select>
+            <% } else { %>
+              <input type="<%= input.type %>" id="<%= input.id %>" class="w-full bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-2xl p-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none [color-scheme:light] dark:[color-scheme:dark] shadow-inner" />
+            <% } %>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Toggles (Trip Type, Direction, Bags) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10 pt-8 pb-8 border-y border-gray-200 dark:border-white/10">
+        <% const toggles = [
+          { name: 'trip_type', label: __('FORM_TRIP_TYPE'), opts: [__('FORM_TRIP_INSIDE'), __('FORM_TRIP_OUTSIDE')] },
+          { name: 'direction', label: __('FORM_DIRECTION'), opts: [__('FORM_DIR_ONEWAY'), __('FORM_DIR_ROUND')] },
+          { name: 'bags', label: __('FORM_BAGS'), opts: [__('FORM_YES'), __('FORM_NO')] }
+        ]; %>
+        
+        <% toggles.forEach(toggle => { %>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4"><%= toggle.label %></label>
+          <div class="flex gap-4">
+            <% toggle.opts.forEach((opt, idx) => { %>
+            <label class="flex-1 cursor-pointer">
+              <input type="radio" name="<%= toggle.name %>" value="<%= opt %>" class="peer sr-only" <%= idx === 0 ? 'checked' : '' %> />
+              <div class="text-center py-3.5 rounded-2xl border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-black/30 text-gray-600 dark:text-gray-400 peer-checked:border-gold-500 peer-checked:text-gold-600 dark:peer-checked:text-gold-400 peer-checked:bg-gold-500/10 transition-all font-medium text-sm shadow-sm">
+                <%= opt %>
+              </div>
+            </label>
+            <% }) %>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+
+      <!-- 2. Car Selection -->
+      <div class="mb-10">
+        <h3 class="text-xl font-serif font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+          <span class="w-8 h-8 rounded-full bg-gold-500/20 flex items-center justify-center text-gold-600 dark:text-gold-400 text-sm">2</span>
+          <%= __('FORM_CAR_TYPE') %>
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <% const carTypes = [
+            { value: __('CAR_SEDAN'), img: '/images/sedan.png' },
+            { value: __('CAR_SUV_MODERN'), img: '/images/suv.png' },
+            { value: __('CAR_FAMILY_VIP'), img: '/images/vip.png' },
+            { value: __('CAR_SUV_FAMILY'), img: '/images/suv7.png' },
+            { value: __('CAR_H1'), img: '/images/h18.png' },
+            { value: __('CAR_MICROBUS'), img: '/images/microbus.png' }
+          ]; %>
+          <% carTypes.forEach((car, idx) => { %>
+            <label class="cursor-pointer relative group">
+              <input type="radio" name="car_type" value="<%= car.value %>" class="peer sr-only" required <%= idx === 0 ? 'checked' : '' %> />
+              <div class="h-full rounded-2xl border-2 border-dashed border-gray-300 dark:border-white/10 bg-white/50 dark:bg-black/30 p-4 group-hover:border-gold-500/50 peer-checked:border-solid peer-checked:border-gold-500 peer-checked:bg-gold-500/10 transition-all text-center flex flex-col items-center justify-between shadow-sm">
+                <img src="<%= car.img %>" class="h-16 w-full object-contain mb-3 drop-shadow-lg group-hover:scale-110 transition-transform duration-300" />
+                <span class="block text-xs font-bold text-gray-600 dark:text-gray-300 peer-checked:text-gold-600 dark:peer-checked:text-gold-400"><%= car.value %></span>
+              </div>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- 3. Customer Details -->
+      <div class="mb-10">
+        <h3 class="text-xl font-serif font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+          <span class="w-8 h-8 rounded-full bg-gold-500/20 flex items-center justify-center text-gold-600 dark:text-gold-400 text-sm">3</span>
+          <%= __('STEP_YOUR_DETAILS') %>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="group">
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"><%= __('FORM_NAME') %></label>
+            <input type="text" id="customer_name" class="w-full bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-2xl p-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none shadow-inner" />
+          </div>
+          <div class="group">
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"><%= __('FORM_PHONE') %></label>
+            <input type="tel" id="customer_phone" class="w-full bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-2xl p-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none shadow-inner" />
+          </div>
+          <div class="group">
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"><%= __('FORM_BACKUP_PHONE') %></label>
+            <input type="tel" id="backup_phone" class="w-full bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-2xl p-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none shadow-inner" />
+          </div>
+          <div class="group">
+            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"><%= __('FORM_PASSENGERS') %></label>
+            <input type="number" id="passengers" min="1" value="1" class="w-full bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-2xl p-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none shadow-inner" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Notes & Checkboxes -->
+      <div class="mb-10">
+        <div class="group mb-6">
+          <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"><%= __('FORM_NOTES') %></label>
+          <textarea id="notes" rows="3" placeholder="<%= __('FORM_NOTES_PH') %>" class="w-full bg-white/50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-2xl p-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all outline-none resize-none shadow-inner placeholder-gray-400 dark:placeholder-gray-600"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <label class="flex items-center cursor-pointer group w-fit">
+            <input type="checkbox" id="airport" value="Yes" class="w-5 h-5 accent-gold-500 bg-white/50 dark:bg-black/30 border-gray-300 dark:border-white/10 rounded focus:ring-gold-500 cursor-pointer" />
+            <span class="mx-3 text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition"><%= __('FORM_AIRPORT') %></span>
+          </label>
+          <label class="flex items-center cursor-pointer group w-fit">
+            <input type="checkbox" id="terms" required class="w-5 h-5 accent-gold-500 bg-white/50 dark:bg-black/30 border-gray-300 dark:border-white/10 rounded focus:ring-gold-500 cursor-pointer" />
+            <span class="mx-3 text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition"><%= __('FORM_TERMS') %></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="button" onclick="sendToWhatsApp()" class="w-full btn-gold text-black font-bold py-5 rounded-2xl text-sm tracking-[0.2em] uppercase flex justify-center items-center gap-3">
+        <span><%= __('FORM_SUBMIT_COST') %></span>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </button>
+    </form>
+  </div>
+</section>
+
+│    ├── 📄 fleet.ejs
+<section id="fleet" class="py-24 lg:py-32 px-6 relative noise-bg">
+    <div class="absolute top-20 left-10 w-96 h-96 rounded-full bg-gold-500/5 blur-[100px] pointer-events-none"></div>
+    
+    <div class="max-w-7xl mx-auto relative z-10">
+        <div class="text-center mb-16 fade-in">
+            <span class="text-sm tracking-[0.3em] text-gray-500 dark:text-gray-400 uppercase"><%= __('FLEET_SUBTITLE') %></span>
+            <h2 class="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-6 text-gray-900 dark:text-white mt-4"><%= __('FLEET_TITLE') %></h2>
+            <div class="w-20 h-1 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-400 mx-auto"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <% if (vehicles.length === 0) { %>
+                <p class="text-center text-gray-500 dark:text-gray-400 col-span-full py-20 font-medium"><%= __('FLEET_EMPTY') %></p>
+            <% } %>
+
+            <% vehicles.forEach((vehicle, index) => { %>
+            <div class="group fade-in" style="transition-delay: 100ms">
+                <div class="glass-card rounded-3xl overflow-hidden transition-all duration-500 hover:border-gold-500/50 hover:-translate-y-2 hover:shadow-2xl hover:shadow-gold-500/10 h-full flex flex-col">
+                    
+                    <!-- Image Container -->
+                    <div class="relative h-64 lg:h-72 overflow-hidden bg-gray-200 dark:bg-dark-800">
+                        <img src="<%= vehicle.image_url %>" alt="<%= vehicle.name %>" class="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <div class="absolute top-4 right-4">
+                            <span class="px-4 py-1.5 rounded-full text-xs font-bold tracking-wider bg-white/90 dark:bg-black/70 backdrop-blur-md text-gold-600 dark:text-gold-400 shadow-lg">
+                                <%= vehicle.category %>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="p-8 flex flex-col flex-grow">
+                        <div class="mb-6 flex-grow">
+                            <h3 class="text-2xl font-serif font-bold mb-3 text-gray-900 dark:text-white group-hover:text-gold-600 dark:group-hover:text-gold-400 transition-colors duration-300"><%= vehicle.name %></h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed font-medium"><%= lang === 'ar' ? vehicle.desc_ar : vehicle.desc_en %></p>
+                        </div>
+                        
+                        <!-- Specs -->
+                        <div class="grid grid-cols-2 gap-4 mb-8 pt-6 border-t border-gray-200 dark:border-white/10">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gold-500/10 flex items-center justify-center text-gold-600 dark:text-gold-400">👤</div>
+                                <div>
+                                    <div class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold"><%= __('FLEET_SEATS') %></div>
+                                    <div class="text-gray-900 dark:text-white font-bold"><%= vehicle.passengers %></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gold-500/10 flex items-center justify-center text-gold-600 dark:text-gold-400">🧳</div>
+                                <div>
+                                    <div class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold"><%= __('FLEET_BAGS') %></div>
+                                    <div class="text-gray-900 dark:text-white font-bold"><%= vehicle.luggage %></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="#contact" class="block w-full text-center btn-gold text-black font-bold py-4 rounded-xl text-xs tracking-[0.2em] uppercase">
+                            <%= __('FLEET_RESERVE') %>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+        </div>
+    </div>
+</section>
+
+
+│    ├── 📄 floating-buttons.ejs
+<div class="fixed bottom-8 <%= lang === 'ar' ? 'left-6' : 'right-6' %> flex flex-col gap-4 z-50 fade-in">
+  
+  <!-- WhatsApp Button -->
+  <a href="https://wa.me/201111036937" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] text-white p-4 rounded-full shadow-lg shadow-[#25D366]/30 hover:bg-[#20bd5a] hover:scale-110 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group relative border border-white/20">
+    <span class="absolute <%= lang === 'ar' ? 'left-full ml-4' : 'right-full mr-4' %> glass-card text-gray-900 dark:text-white text-xs font-bold px-4 py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0 whitespace-nowrap pointer-events-none shadow-xl">
+      <%= __('BTN_WHATSAPP' ) %>
+    </span>
+    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.383 0 0 5.383 0 12.031c0 2.124.553 4.195 1.604 6.015L.273 24l6.112-1.604A11.943 11.943 0 0012.031 24c6.648 0 12.031-5.383 12.031-12.031C24.062 5.383 18.679 0 12.031 0zm3.625 17.32c-.156.442-.906.844-1.25.875-.344.031-1.094.156-3.531-1.031-2.938-1.438-4.813-4.438-4.969-4.656-.156-.219-1.188-1.594-1.188-3.031 0-1.438.75-2.156 1.031-2.469.281-.313.625-.375.844-.375.219 0 .438 0 .625.031.219.031.5-.094.781.594.281.719.969 2.375 1.062 2.563.094.188.156.406.031.656-.125.25-.188.406-.375.625-.188.219-.406.469-.563.625-.188.188-.375.375-.156.719.219.344.969 1.563 2.063 2.438 1.406 1.125 2.594 1.469 2.938 1.625.344.156.563.125.781-.094.219-.219.938-1.094 1.188-1.469.25-.375.5-.313.813-.188.313.125 1.969.938 2.313 1.094.344.156.563.25.656.375.094.125.094.719-.063 1.156z"></path></svg>
+  </a>
+
+  <!-- Phone Call Button -->
+  <a href="tel:+201111036937" class="bg-gradient-to-br from-gold-600 to-gold-400 text-black p-4 rounded-full shadow-lg shadow-gold-500/30 hover:scale-110 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group relative border border-white/20">
+    <span class="absolute <%= lang === 'ar' ? 'left-full ml-4' : 'right-full mr-4' %> glass-card text-gray-900 dark:text-white text-xs font-bold px-4 py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0 whitespace-nowrap pointer-events-none shadow-xl">
+      <%= __('BTN_CALL_US') %>
+    </span>
+    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+  
+
+│    ├── 📄 footer.ejs
+<footer class="py-16 border-t border-gray-200 dark:border-white/5 relative noise-bg bg-white/30 dark:bg-black/30 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-6 relative z-10">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+      
+      <!-- Brand -->
+      <div>
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gold-600 to-gold-400 flex items-center justify-center text-black font-bold shadow-lg shadow-gold-500/30">V</div>
+          <div class="text-2xl font-serif font-bold tracking-[0.2em] text-gray-900 dark:text-white">
+            VIP<span class="gold-gradient">FORCARS</span>
+          </div>
+        </div>
+        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed font-medium max-w-sm">
+          <%= __('FOOTER_DESC') %>
+        </p>
+      </div>
+      
+      <!-- Links -->
+      <div>
+        <h4 class="text-gray-900 dark:text-white font-bold mb-6 tracking-widest uppercase text-sm"><%= __('FOOTER_LINKS') %></h4>
+        <ul class="space-y-4 text-gray-600 dark:text-gray-400 text-sm font-medium">
+          <li><a href="#fleet" class="hover:text-gold-600 dark:hover:text-gold-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 bg-gold-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span><%= __('NAV_FLEET') %></a></li>
+          <li><a href="#services" class="hover:text-gold-600 dark:hover:text-gold-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 bg-gold-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span><%= __('NAV_SERVICES') %></a></li>
+          <li><a href="#contact" class="hover:text-gold-600 dark:hover:text-gold-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 bg-gold-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span><%= __('NAV_BOOK') %></a></li>
+        </ul>
+      </div>
+      
+      <!-- Contact -->
+      <div>
+        <h4 class="text-gray-900 dark:text-white font-bold mb-6 tracking-widest uppercase text-sm"><%= __('FOOTER_CONTACT') %></h4>
+        <ul class="space-y-4 text-gray-600 dark:text-gray-400 text-sm font-medium">
+          <li dir="ltr" class="<%= lang === 'ar' ? 'text-right' : '' %> flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-gold-500/10 flex items-center justify-center text-gold-600 dark:text-gold-400">📞</span>
+            <a href="tel:+201111036937" class="hover:text-gold-600 dark:hover:text-gold-400 transition-colors">+20 1111036937</a>
+          </li>
+          <li dir="ltr" class="<%= lang === 'ar' ? 'text-right' : '' %> flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-gold-500/10 flex items-center justify-center text-gold-600 dark:text-gold-400">✉️</span>
+            <a href="mailto:reservations@vipforcars.com" class="hover:text-gold-600 dark:hover:text-gold-400 transition-colors">reservations@vipforcars.com</a>
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-gold-500/10 flex items-center justify-center text-gold-600 dark:text-gold-400">📍</span> 
+            <span>123 Luxury Avenue, VIP City</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="text-center text-gray-500 dark:text-gray-500 text-xs font-medium pt-8 border-t border-gray-200 dark:border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <span>&copy; 2026 <%= __('FOOTER_RIGHTS') %></span>
+      <a href="/admin/login" class="hover:text-gold-500 transition-colors"><%= __('FOOTER_ADMIN') %></a>
+    </div>
+  </div>
+</footer>
+
+│    ├── 📄 head.ejs
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VIP For Cars - Luxury Transport</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+  rel="stylesheet"
+/>
+
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          gold: { 400: "#e8c56a", 500: "#d4af37", 600: "#a88b2c" },
+          dark: { 900: "#0a0a0a", 800: "#121212", 700: "#1a1a1a" },
+          light: { 50: "#fcfaf5", 100: "#f4f0e6" },
+        },
+        fontFamily: {
+          sans: ["Montserrat", "sans-serif"],
+          serif: ["Playfair Display", "serif"],
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Luxury Custom Cursor */
+  body,
+  a,
+  button,
+  select,
+  input,
+  textarea {
+    cursor:
+      url('data:image/svg+xml;utf8,<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M10 6 L10 24 L14.5 19.5 L22 19.5 Z" fill="%23d4af37" stroke="%23d4af37" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>')
+        8 4,
+      auto !important;
+  }
+
+  /* Animations */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition:
+      opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Gradients & Buttons */
+  .gold-gradient {
+    background: linear-gradient(135deg, #a88b2c 0%, #d4af37 50%, #e8c56a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .btn-gold {
+    background: linear-gradient(135deg, #a88b2c 0%, #d4af37 50%, #e8c56a 100%);
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .btn-gold:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+  }
+
+  /* Dynamic Glassmorphism (Adapts to Light/Dark) */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+  }
+  .dark .glass-card {
+    background: rgba(26, 26, 26, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Noise Texture */
+  .noise-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter )' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+  .dark .noise-bg::before {
+    opacity: 0.06;
+  }
+</style>
+
+│    ├── 📄 hero.ejs
+<header class="relative h-screen flex items-center justify-center text-center overflow-hidden">
+  <!-- Background Image & Dynamic Overlays -->
+  <div class="absolute inset-0 z-0">
+    <img
+      src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2670&auto=format&fit=crop"
+      alt="Luxury Car"
+      class="w-full h-full object-cover opacity-80 dark:opacity-40 transition-opacity duration-700"
+    />
+    <!-- Adapts to Light/Dark Mode -->
+    <div class="absolute inset-0 bg-gradient-to-t from-light-50 via-light-50/60 dark:from-dark-900 dark:via-dark-900/80 to-transparent transition-colors duration-500"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_rgba(252,250,245,0.5 )_100%)] dark:bg-[radial-gradient(ellipse_at_center,_transparent_0%,_rgba(10,10,10,0.8)_100%)] transition-colors duration-500"></div>
+  </div>
+
+  <!-- Decorative Glow -->
+  <div class="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+    <div class="w-[800px] h-[800px] rounded-full bg-gradient-to-br from-gold-500/20 to-transparent blur-[120px]"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="relative z-10 max-w-5xl px-6 fade-in mt-16">
+    <div class="mb-8">
+      <span class="inline-block px-6 py-2.5 rounded-full glass-card text-xs font-bold tracking-[0.3em] text-gray-800 dark:text-gray-300 uppercase shadow-sm">
+        <%= __('HERO_SUBTITLE') %>
+      </span>
+    </div>
+    
+    <h1 class="text-5xl md:text-7xl lg:text-8xl font-serif font-bold mb-6 leading-tight text-gray-900 dark:text-white drop-shadow-lg">
+      <%= __('HERO_TITLE') %>
+      <span class="gold-gradient"><%= __('HERO_LUXURY') %></span>
+    </h1>
+    
+    <p class="text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed font-medium drop-shadow-md">
+      <%= __('HERO_DESC') %>
+    </p>
+    
+    <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+      <a href="#fleet" class="btn-gold text-black font-bold px-12 py-4 rounded-full text-sm tracking-[0.2em] uppercase w-full sm:w-auto">
+        <%= __('HERO_BTN') %>
+      </a>
+      <a href="#services" class="glass-card px-12 py-4 rounded-full text-gray-900 dark:text-white font-bold text-sm tracking-[0.2em] uppercase hover:border-gold-500 hover:text-gold-600 dark:hover:text-gold-400 transition-all duration-300 w-full sm:w-auto">
+        <%= __('HERO_SERVICES_BTN') %>
+      </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="mt-24 flex justify-center items-center gap-8 md:gap-16 glass-card py-6 px-8 rounded-3xl inline-flex mx-auto">
+      <div class="text-center">
+        <div class="text-3xl md:text-4xl font-serif font-bold gold-gradient">12+</div>
+        <div class="text-xs text-gray-600 dark:text-gray-400 mt-2 tracking-widest uppercase font-semibold"><%= __('STAT_YEARS') %></div>
+      </div>
+      <div class="h-12 w-px bg-gray-300 dark:bg-gray-700"></div>
+      <div class="text-center">
+        <div class="text-3xl md:text-4xl font-serif font-bold gold-gradient">15K+</div>
+        <div class="text-xs text-gray-600 dark:text-gray-400 mt-2 tracking-widest uppercase font-semibold"><%= __('STAT_CLIENTS') %></div>
+      </div>
+      <div class="h-12 w-px bg-gray-300 dark:bg-gray-700"></div>
+      <div class="text-center">
+        <div class="text-3xl md:text-4xl font-serif font-bold gold-gradient">50+</div>
+        <div class="text-xs text-gray-600 dark:text-gray-400 mt-2 tracking-widest uppercase font-semibold"><%= __('STAT_VEHICLES') %></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll Indicator -->
+  <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-10">
+    <div class="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400 animate-bounce">
+      <span class="text-xs tracking-widest uppercase font-semibold"><%= __('SCROLL') %></span>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+    </div>
+  </div>
+</header>
+
+│    ├── 📄 navbar.ejs
+<nav class="fixed w-full z-50 transition-all duration-500" id="navbar">
+  <div
+    class="glass-card border-b border-gray-200 dark:border-gray-800/50 transition-colors duration-500"
+  >
+    <div
+      class="px-6 lg:px-12 py-4 flex justify-between items-center max-w-7xl mx-auto"
+    >
+      <!-- Logo -->
+      <a href="#" class="group flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-full bg-gradient-to-br from-gold-600 to-gold-400 flex items-center justify-center text-black font-bold shadow-lg shadow-gold-500/30"
+        >
+          V
+        </div>
+        <div
+          class="text-2xl font-serif font-bold tracking-[0.2em] text-gray-900 dark:text-white"
+        >
+          VIP<span class="gold-gradient">FORCARS</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <div class="hidden lg:flex items-center gap-8">
+        <a
+          href="#fleet"
+          class="text-sm font-medium tracking-[0.15em] text-gray-600 dark:text-gray-300 hover:text-gold-500 dark:hover:text-gold-400 transition-colors"
+          >FLEET</a
+        >
+        <a
+          href="#services"
+          class="text-sm font-medium tracking-[0.15em] text-gray-600 dark:text-gray-300 hover:text-gold-500 dark:hover:text-gold-400 transition-colors"
+          >SERVICES</a
+        >
+        <a
+          href="#contact"
+          class="text-sm font-medium tracking-[0.15em] text-gray-600 dark:text-gray-300 hover:text-gold-500 dark:hover:text-gold-400 transition-colors"
+          >CONTACT</a
+        >
+
+        <div class="h-6 w-px bg-gray-300 dark:bg-gray-700"></div>
+
+        <!-- Theme Toggle -->
+        <button
+          onclick="togglePublicTheme()"
+          class="p-2 rounded-full text-gray-600 dark:text-gold-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-all group"
+        >
+          <svg
+            class="w-5 h-5 hidden dark:block group-hover:rotate-90 transition-transform"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+            ></path>
+          </svg>
+          <svg
+            class="w-5 h-5 block dark:hidden group-hover:-rotate-12 transition-transform"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+            ></path>
+          </svg>
+        </button>
+
+        <!-- Language Switcher -->
+        <div class="relative group">
+          <button
+            class="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-700 text-sm font-medium text-gray-800 dark:text-white hover:border-gold-500 transition-colors"
+          >
+            <span>🌐 <%= lang.toUpperCase() %></span>
+          </button>
+          <div
+            class="absolute right-0 top-full mt-2 w-32 glass-card rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0"
+          >
+            <div class="py-2 max-h-60 overflow-y-auto">
+              <a
+                href="/lang/en"
+                class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'en' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+                >English</a
+              >
+              <a
+                href="/lang/ar"
+                class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'ar' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+                >العربية</a
+              >
+              <a
+                href="/lang/fr"
+                class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'fr' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+                >Français</a
+              >
+              <a
+                href="/lang/de"
+                class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'de' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+                >Deutsch</a
+              >
+              <a
+                href="/lang/it"
+                class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'it' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+                >Italiano</a
+              >
+              <a
+                href="/lang/es"
+                class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'es' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+                >Español</a
+              >
+              <a
+                href="/lang/ru"
+                class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'ru' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+                >Русский</a
+              >
+              <a
+                href="/lang/tr"
+                class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'tr' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+                >Türkçe</a
+              >
+              <a
+                href="/lang/zh"
+                class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'zh' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+                >中文</a
+              >
+              <a
+                href="/lang/hi"
+                class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'hi' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+                >हिन्दी</a
+              >
+              <a
+                href="/lang/vi"
+                class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'vi' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+                >Tiếng Việt</a
+              >
+              <a
+                href="/lang/ja"
+                class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'ja' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+                >日本語</a
+              >
+            </div>
+          </div>
+        </div>
+
+        <a
+          href="#contact"
+          class="btn-gold text-black font-bold px-6 py-2.5 rounded-full text-xs tracking-[0.15em] uppercase"
+          >BOOK NOW</a
+        >
+      </div>
+
+      <!-- Mobile Menu Button & Theme Toggle -->
+      <div class="lg:hidden flex items-center gap-4">
+        <button
+          onclick="togglePublicTheme()"
+          class="p-2 rounded-full text-gray-600 dark:text-gold-400"
+        >
+          <svg
+            class="w-5 h-5 hidden dark:block"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+            ></path>
+          </svg>
+          <svg
+            class="w-5 h-5 block dark:hidden"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+            ></path>
+          </svg>
+        </button>
+        <button
+          id="mobileMenuBtn"
+          class="text-gray-900 dark:text-white focus:outline-none"
+        >
+          <svg
+            class="w-7 h-7"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div
+      id="mobileMenu"
+      class="hidden lg:hidden border-t border-gray-200 dark:border-gray-800/50 bg-white/90 dark:bg-dark-900/90 backdrop-blur-xl"
+    >
+      <div class="px-6 py-4 flex flex-col gap-4">
+        <a
+          href="#fleet"
+          class="text-sm font-medium tracking-[0.15em] text-gray-800 dark:text-gray-200"
+          >FLEET</a
+        >
+        <a
+          href="#services"
+          class="text-sm font-medium tracking-[0.15em] text-gray-800 dark:text-gray-200"
+          >SERVICES</a
+        >
+        <a
+          href="#contact"
+          class="text-sm font-medium tracking-[0.15em] text-gray-800 dark:text-gray-200"
+          >CONTACT</a
+        >
+
+        <div class="h-px w-full bg-gray-200 dark:bg-gray-800"></div>
+
+        <div class="flex flex-wrap gap-2">
+          <a
+            href="/lang/en"
+            class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'en' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+            >English</a
+          >
+          <a
+            href="/lang/ar"
+            class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'ar' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+            >العربية</a
+          >
+          <a
+            href="/lang/fr"
+            class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'fr' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+            >Français</a
+          >
+          <a
+            href="/lang/de"
+            class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'de' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+            >Deutsch</a
+          >
+          <a
+            href="/lang/it"
+            class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'it' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+            >Italiano</a
+          >
+          <a
+            href="/lang/es"
+            class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'es' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+            >Español</a
+          >
+          <a
+            href="/lang/ru"
+            class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'ru' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+            >Русский</a
+          >
+          <a
+            href="/lang/tr"
+            class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'tr' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+            >Türkçe</a
+          >
+          <a
+            href="/lang/zh"
+            class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'zh' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+            >中文</a
+          >
+          <a
+            href="/lang/hi"
+            class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'hi' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+            >हिन्दी</a
+          >
+          <a
+            href="/lang/vi"
+            class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'vi' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+            >Tiếng Việt</a
+          >
+          <a
+            href="/lang/ja"
+            class="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors <%= lang === 'ja' ? 'text-gold-600 dark:text-gold-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:text-gold-500' %>"
+            >日本語</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Mobile Menu Toggle
+  document.getElementById("mobileMenuBtn").addEventListener("click", () => {
+    const menu = document.getElementById("mobileMenu");
+    menu.classList.toggle("hidden");
+  });
+
+  // Public Theme Toggle Logic
+  function togglePublicTheme() {
+    const html = document.documentElement;
+    if (html.classList.contains("dark")) {
+      html.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    } else {
+      html.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    }
+  }
+</script>
+
+<script>
+  // Mobile language switcher toggle
+  const mobileLangBtn = document.getElementById("mobile-lang-btn");
+  const mobileLangDropdown = document.getElementById("mobile-lang-dropdown");
+
+  if (mobileLangBtn && mobileLangDropdown) {
+    mobileLangBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      mobileLangDropdown.classList.toggle("opacity-0");
+      mobileLangDropdown.classList.toggle("invisible");
+      mobileLangDropdown.classList.toggle("translate-y-2");
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", () => {
+      mobileLangDropdown.classList.add("opacity-0");
+      mobileLangDropdown.classList.add("invisible");
+      mobileLangDropdown.classList.add("translate-y-2");
+    });
+  }
+</script>
+
+│    ├── 📄 scripts.ejs
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Intersection Observer for fade-in animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in').forEach((el) => {
+            observer.observe(el);
+        });
+
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            if (currentScroll > 50) {
+                navbar.style.transform = 'translateY(0)';
+                navbar.style.boxShadow = '0 10px 40px rgba(0,0,0,0.3)';
+            } else {
+                navbar.style.transform = 'translateY(0)';
+                navbar.style.boxShadow = 'none';
+            }
+            lastScroll = currentScroll;
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    });
+</script>
+
+│    ├── 📄 services.ejs
+<section id="services" class="py-24 lg:py-32 px-6 relative noise-bg">
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-gold-500/5 blur-[120px] pointer-events-none"></div>
+
+  <div class="max-w-7xl mx-auto relative z-10">
+    <div class="text-center mb-16 fade-in">
+      <span class="text-sm tracking-[0.3em] text-gray-500 dark:text-gray-400 uppercase"><%= __('SERVICES_SUBTITLE') %></span>
+      <h2 class="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-6 text-gray-900 dark:text-white mt-4"><%= __('SERVICES_TITLE') %></h2>
+      <div class="w-20 h-1 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-400 mx-auto"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <% const services = [
+        { icon: '✈️', title: __('SRV1_TITLE'), desc: __('SRV1_DESC'), delay: '0ms' },
+        { icon: '💼', title: __('SRV2_TITLE'), desc: __('SRV2_DESC'), delay: '100ms' },
+        { icon: '💍', title: __('SRV3_TITLE'), desc: __('SRV3_DESC'), delay: '200ms' }
+      ]; %>
+
+      <% services.forEach(srv => { %>
+      <div class="fade-in" style="transition-delay: 100ms">
+        <div class="glass-card rounded-3xl p-10 transition-all duration-500 group hover:border-gold-500/50 hover:-translate-y-3 hover:shadow-2xl hover:shadow-gold-500/10 h-full">
+          <div class="w-20 h-20 mx-auto rounded-2xl bg-gold-500/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500 border border-gold-500/20">
+            <div class="text-4xl drop-shadow-lg"><%= srv.icon %></div>
+          </div>
+          <h3 class="text-2xl font-serif font-bold mb-4 text-center text-gray-900 dark:text-white group-hover:text-gold-600 dark:group-hover:text-gold-400 transition-colors duration-300"><%= srv.title %></h3>
+          <p class="text-gray-600 dark:text-gray-400 text-center leading-relaxed font-medium"><%= srv.desc %></p>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+│  └── 📂 public/
+```
