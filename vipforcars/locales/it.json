@@ -76,9 +76,11 @@
   "FORM_SUBMIT_COST": "Scopri il costo e prenota ora",
   "BTN_WHATSAPP": "WhatsApp",
   "BTN_CALL_US": "Chiamaci",
-    "FORM_TRIP_TYPE": "Tipo di viaggio",
+  "FORM_TRIP_TYPE": "Tipo di viaggio",
   "FORM_TRIP_INSIDE": "All'interno della provincia",
   "FORM_TRIP_OUTSIDE": "Tra province",
-  "FORM_BACKUP_PHONE": "Numero di telefono di riserva"
-
+  "FORM_BACKUP_PHONE": "Numero di telefono di riserva",
+  "SEO_TITLE": "VIP For Cars | Noleggio Auto di Lusso e Autista Privato in Egitto",
+  "SEO_DESC": "Prenota auto di lusso, trasferimenti aeroportuali e servizi di autista VIP a Il Cairo, Giza, Alessandria e in tutto l'Egitto. Viaggia con comfort, sicurezza e stile impeccabile.",
+  "SEO_KEYWORDS": "noleggio auto lusso Egitto, autista privato Il Cairo, trasferimento aeroporto Egitto, affitto auto con conducente Il Cairo, viaggi d'affari Egitto, trasporto VIP Egitto"
 }

@@ -76,9 +76,11 @@
   "FORM_SUBMIT_COST": "Connaître le prix et réserver maintenant",
   "BTN_WHATSAPP": "WhatsApp",
   "BTN_CALL_US": "Appelez-nous",
-    "FORM_TRIP_TYPE": "Type de trajet",
+  "FORM_TRIP_TYPE": "Type de trajet",
   "FORM_TRIP_INSIDE": "À l'intérieur de la province",
   "FORM_TRIP_OUTSIDE": "Entre provinces",
-  "FORM_BACKUP_PHONE": "Numéro de téléphone de secours"
-
+  "FORM_BACKUP_PHONE": "Numéro de téléphone de secours",
+  "SEO_TITLE": "VIP For Cars | Chauffeur Privé et Transferts Aéroport de Luxe en Égypte",
+  "SEO_DESC": "Réservez des voitures de luxe, des transferts aéroport et des services de chauffeur VIP au Caire, à Gizeh, à Alexandrie et dans toute l'Égypte. Voyagez avec confort et élégance.",
+  "SEO_KEYWORDS": "location voiture luxe Égypte, chauffeur privé Le Caire, transfert aéroport Égypte, louer voiture avec chauffeur Le Caire, voyage d'affaires Égypte, transport VIP Égypte"
 }

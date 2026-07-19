@@ -76,9 +76,11 @@
   "FORM_SUBMIT_COST": "Conocer el costo y reservar ahora",
   "BTN_WHATSAPP": "WhatsApp",
   "BTN_CALL_US": "Llámanos",
-    "FORM_TRIP_TYPE": "Tipo de viaje",
+  "FORM_TRIP_TYPE": "Tipo de viaje",
   "FORM_TRIP_INSIDE": "Dentro de la provincia",
   "FORM_TRIP_OUTSIDE": "Entre provincias",
-  "FORM_BACKUP_PHONE": "Número de teléfono de respaldo"
-
+  "FORM_BACKUP_PHONE": "Número de teléfono de respaldo",
+  "SEO_TITLE": "VIP For Cars | Chófer Privado y Traslados de Lujo en Egipto",
+  "SEO_DESC": "Reserve autos de lujo, traslados al aeropuerto y servicios de chófer VIP en El Cairo, Guiza, Alejandría y todo Egipto. Viaje con comodidad, seguridad y un estilo impecable.",
+  "SEO_KEYWORDS": "alquiler autos lujo Egipto, chófer VIP El Cairo, traslado aeropuerto Egipto, alquilar auto con conductor El Cairo, viajes corporativos Egipto, conductor privado Egipto"
 }

@@ -76,9 +76,11 @@
   "FORM_SUBMIT_COST": "Preis erfahren und jetzt buchen",
   "BTN_WHATSAPP": "WhatsApp",
   "BTN_CALL_US": "Rufen Sie uns an",
-    "FORM_TRIP_TYPE": "Reisetyp",
+  "FORM_TRIP_TYPE": "Reisetyp",
   "FORM_TRIP_INSIDE": "Innerhalb der Provinz",
   "FORM_TRIP_OUTSIDE": "Zwischen Provinzen",
-  "FORM_BACKUP_PHONE": "Ersatztelefonnummer"
-
+  "FORM_BACKUP_PHONE": "Ersatztelefonnummer",
+  "SEO_TITLE": "VIP For Cars | Luxus-Chauffeurservice & Flughafentransfers in Ägypten",
+  "SEO_DESC": "Buchen Sie Premium-Luxusautos, Flughafentransfers und VIP-Chauffeurdienste in Kairo, Gizeh, Alexandria und ganz Ägypten. Reisen Sie mit höchstem Komfort und Sicherheit.",
+  "SEO_KEYWORDS": "Luxusauto mieten Ägypten, VIP Chauffeur Kairo, Flughafentransfer Ägypten, Auto mit Fahrer mieten Kairo, Geschäftsreisen Ägypten, privater Fahrer Ägypten"
 }

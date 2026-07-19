@@ -1,6 +1,101 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>VIP For Cars - Luxury Transport</title>
+
+<!-- Primary Meta Tags -->
+<title><%= __('SEO_TITLE') %></title>
+<meta name="title" content="<%= __('SEO_TITLE') %>" />
+<meta name="description" content="<%= __('SEO_DESC') %>" />
+<meta name="keywords" content="<%= __('SEO_KEYWORDS') %>" />
+<meta name="author" content="VIP For Cars" />
+<meta name="robots" content="index, follow" />
+<meta name="language" content="<%= lang %>" />
+<meta property="og:locale" content="<%= lang === 'en' ? 'en_US' : lang === 'ar' ? 'ar_EG' : lang %>">
+
+<!-- Open Graph / Facebook / WhatsApp -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://www.vipforcars.onrender.com/" />
+<meta property="og:title" content="<%= __('SEO_TITLE' ) %>" />
+<meta property="og:description" content="<%= __('SEO_DESC') %>" />
+<!-- Note: You should upload a nice 1200x630 image of your best car to your public/images folder and name it og-image.jpg -->
+<meta
+  property="og:image"
+  content="https://www.vipforcars.onrender.com/images/og-image.jpg"
+/>
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content="https://www.vipforcars.onrender.com/" />
+<meta property="twitter:title" content="<%= __('SEO_TITLE' ) %>" />
+<meta property="twitter:description" content="<%= __('SEO_DESC') %>" />
+<meta
+  property="twitter:image"
+  content="https://www.vipforcars.onrender.com/images/og-image.jpg"
+/>
+
+<!-- Hreflang Tags (CRITICAL for your 12 languages so Google knows who to show the site to ) -->
+<link rel="alternate" hreflang="en" href="https://www.vipforcars.onrender.com/lang/en" />
+<link rel="alternate" hreflang="ar" href="https://www.vipforcars.onrender.com/lang/ar" />
+<link rel="alternate" hreflang="fr" href="https://www.vipforcars.onrender.com/lang/fr" />
+<link rel="alternate" hreflang="de" href="https://www.vipforcars.onrender.com/lang/de" />
+<link rel="alternate" hreflang="it" href="https://www.vipforcars.onrender.com/lang/it" />
+<link rel="alternate" hreflang="es" href="https://www.vipforcars.onrender.com/lang/es" />
+<link rel="alternate" hreflang="ru" href="https://www.vipforcars.onrender.com/lang/ru" />
+<link rel="alternate" hreflang="tr" href="https://www.vipforcars.onrender.com/lang/tr" />
+<link rel="alternate" hreflang="zh" href="https://www.vipforcars.onrender.com/lang/zh" />
+<link rel="alternate" hreflang="hi" href="https://www.vipforcars.onrender.com/lang/hi" />
+<link rel="alternate" hreflang="vi" href="https://www.vipforcars.onrender.com/lang/vi" />
+<link rel="alternate" hreflang="ja" href="https://www.vipforcars.onrender.com/lang/ja" />
+<link rel="alternate" hreflang="x-default" href="https://www.vipforcars.onrender.com/" />
+
+<!-- Canonical URL to prevent duplicate content penalties -->
+<link rel="canonical" href="https://www.vipforcars.onrender.com/" />
+
+<!-- Schema.org Markup (Tells Google exactly what your business is ) -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "AutoRental",
+    "name": "VIP For Cars",
+    "image": "https://www.vipforcars.onrender.com/images/og-image.jpg",
+    "@id": "https://www.vipforcars.onrender.com/",
+    "url": "https://www.vipforcars.onrender.com/",
+    "telephone": "+201111036937",
+    "priceRange": "$$$",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Cairo",
+      "addressLocality": "Cairo",
+      "addressRegion": "Cairo Governorate",
+      "addressCountry": "EG"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 30.0444,
+      "longitude": 31.2357
+    },
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "opens": "00:00",
+      "closes": "23:59"
+    },
+    "sameAs": [
+      "https://www.facebook.com/vipforcars",
+      "https://www.instagram.com/vipforcars"
+    ],
+    "description": "Premium luxury chauffeur and airport transfer services in Egypt."
+  }
+</script>
+
+<!-- Tailwind & Fonts -->
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -32,8 +127,6 @@
   html {
     scroll-behavior: smooth;
   }
-
-  /* Luxury Custom Cursor */
   body,
   a,
   button,
@@ -45,8 +138,6 @@
         8 4,
       auto !important;
   }
-
-  /* Animations */
   .fade-in {
     opacity: 0;
     transform: translateY(30px);
@@ -58,12 +149,10 @@
     opacity: 1;
     transform: translateY(0);
   }
-
-  /* Gradients & Buttons */
   .gold-gradient {
     background: linear-gradient(135deg, #a88b2c 0%, #d4af37 50%, #e8c56a 100%);
-    -webkit-background-clip: text;
     background-clip: text;
+    -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
   .btn-gold {
@@ -75,8 +164,6 @@
     transform: translateY(-3px);
     box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
   }
-
-  /* Dynamic Glassmorphism (Adapts to Light/Dark) */
   .glass-card {
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(20px);
@@ -89,8 +176,6 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
   }
-
-  /* Noise Texture */
   .noise-bg::before {
     content: "";
     position: absolute;
@@ -101,5 +186,15 @@
   }
   .dark .noise-bg::before {
     opacity: 0.06;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 10px;
   }
 </style>
